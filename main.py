@@ -1,4 +1,4 @@
-# main.py atualizado com estrutura de decisão para modo de análise
+
 
 import numpy as np
 import matplotlib.pyplot as plt
