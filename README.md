@@ -1,6 +1,10 @@
 # Simulator_SPR_AIM_WIM
 
-A computational simulator developed in Python for the analysis of optical sensors based on the Surface Plasmon Resonance (SPR) phenomenon, using the **Angular Interrogation Method (AIM)** and the **Wave Interference Method (WIM)**. This project aims to provide a precise, modular, and reproducible platform for investigating the optical properties of multilayer structures applied to biosensors.
+A computational simulator developed in Python for the analysis of optical sensors based on the Surface Plasmon Resonance (SPR) phenomenon, using the **Angular Interrogation Method (AIM)** and the **Wave Interference Method (WIM)** — a numerical approach based on optical interference modeling, also known as the **Transfer Matrix Method (TMM)**. 
+
+⚠️ This should not be confused with **Wavelength Interrogation Mode**, which refers to a measurement technique in SPR where the **wavelength** is varied instead of the angle.
+
+This project aims to provide a precise, modular, and reproducible platform for investigating the optical properties of multilayer structures applied to biosensors.
 
 ## 📌 General Description
 
