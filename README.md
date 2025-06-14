@@ -10,7 +10,7 @@ The `Simulator_SPR_AIM_WIM` project integrates fundamental concepts from electri
 
 This simulator serves as a support tool for scientific research in the context of biomolecular detection, especially in hybrid systems combining **Loop-Mediated Isothermal Amplification (LAMP)** with SPR.
 
-> 🔧 **Note:** This project is still under development. The Wave Interference Method (WIM) has not yet been fully implemented, and dispersion effects have not been incorporated into WIM calculations. In addition, the user interface and documentation are currently in Portuguese and are planned to be translated into English in future versions.
+> 🔧 **Note:** Although the wavelength interrogation mode **(WIM)** — which involves sweeping the wavelength while keeping the incidence angle fixed — has already been simulated separately, it has not yet been integrated into the main simulator. Additionally, dispersion effects have not yet been incorporated into these calculations.
 
 ## 🎓 Academic and Scientific Applications
 
@@ -23,21 +23,19 @@ This simulator serves as a support tool for scientific research in the context o
 
 ## 🧱 Project Structure
 
-```
 Simulator_SPR_AIM_WIM/
-├── main.py                    
-├── fresnel_utils.py          
-├── getFresnelWIM.py          
-├── calculo_figuras.py       
-├── dados_opticos.py          
-├── config_simulacao.py       
-├── entrada_usuario.py        
-├── graficos_de_meritos.py    
-├── figuras_de_merito.py     
-├── .gitignore                
-├── README.md                 
-└── __pycache__/              
-```
+├── main.py
+├── fresnel_utils.py
+├── reflectance_simulator.py
+├── calculate_figures.py
+├── performance_metrics.py
+├── optical_data.py
+├── simulation_config.py
+├── user_input.py
+├── merit_figures_plot.py
+├── .gitignore
+├── README.md
+└── pycache/
 
 ## 🧰 Software Requirements
 
