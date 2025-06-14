@@ -13,12 +13,21 @@ def plot_figures_of_merit(results, metal_thicknesses_nm):
     }
 
     for metric in metrics:
-        plt.figure(figsize=(8, 5))
-        for key in results[metric]:
+        has_valid_data = False
+
+        for key in results.get(metric, {}):
             x = metal_thicknesses_nm
             y = results[metric][key]
 
-            # Only interpolate if there are enough data points and no NaNs
+            if all(np.isnan(y)):
+                print(f"[INFO] Skipping {metric} for {key}: all values are NaN.")
+                continue
+
+            if not has_valid_data:
+                plt.figure(figsize=(8, 5))
+
+            has_valid_data = True
+
             if len(x) >= 4 and not np.any(np.isnan(y)):
                 spline = CubicSpline(x, y)
                 x_fine = np.linspace(min(x), max(x), 500)
@@ -27,10 +36,13 @@ def plot_figures_of_merit(results, metal_thicknesses_nm):
             else:
                 plt.plot(x, y, 'o-', label=str(key))  # fallback without smoothing
 
-        plt.xlabel("Metal Thickness (nm)")
-        plt.ylabel(titles[metric])
-        plt.title(f"Figure of Merit: {titles[metric]}")
-        plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
+        if has_valid_data:
+            plt.xlabel("Metal Thickness (nm)")
+            plt.ylabel(titles[metric])
+            plt.title(f"Figure of Merit: {titles[metric]}")
+            plt.grid(True)
+            plt.legend()
+            plt.tight_layout()
+            plt.show()
+        else:
+            print(f"[INFO] Skipping plot for {metric}: no valid data to display.")
