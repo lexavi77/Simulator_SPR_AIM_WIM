@@ -22,7 +22,11 @@ def executar_simulacao_reflectancia(substrato, metal, analitos, materials,
 
         for d_metal_nm in espessuras_metal_nm:
             d_metal = d_metal_nm * 1e-9
-            d = np.array([d_cr, d_metal, d_analito])
+            # The transfer-matrix routine expects thickness values only for the
+            # internal layers (here: adhesion layer and metal film).  The
+            # analyte is treated as a semi-infinite medium and therefore its
+            # thickness is omitted.
+            d = np.array([d_cr, d_metal])
             n = np.array([
                 materials[substrato],
                 materials["Cr"],
