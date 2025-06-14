@@ -1,6 +1,4 @@
-# dados_opticos.py
-
-# Dicionário com os índices de refração complexos dos materiais a 850 nm
+# Dictionary containing the complex refractive indices of materials at 850 nm
 materials = {
     "PMMA": 1.4835 + 0j,
     "PC": 1.5688 + 0j,

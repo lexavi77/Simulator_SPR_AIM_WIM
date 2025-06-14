@@ -2,70 +2,70 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from fresnel_utils import getFresnelAIM
-from dados_opticos import materials
-from config_simulacao import (
+from optical_data import materials
+from simulation_config import (
     lambda0, theta_deg, theta_rad,
-    d_cr, d_analito, espessuras_metal_nm, analitos
+    d_cr, d_analyte, metal_thicknesses_nm, analytes
 )
-from entrada_usuario import selecionar_materiais
-from figuras_de_merito import calcular_q
-from calculo_figuras import calcular_todas_figuras_de_merito
-from graficos_de_meritos import plotar_figuras_de_merito
-from simulador_reflectancia import executar_simulacao_reflectancia
+from user_input import select_materials
+from performance_metrics import calculate_q
+from calculate_figures import calculate_all_figures_of_merit
+from merit_figures_plot import plot_figures_of_merit
+from reflectance_simulator import run_reflectance_simulation
 
-# ------------------- Lógica de Execução -------------------
+# ------------------- Execution Logic -------------------
 
-print("Escolha o modo de simulação:")
-print("1 - Análise de um material específico")
-print("2 - Comparar metais com analito fixo (H2O_central)")
-modo = input("Modo (1 ou 2): ").strip()
+print("Select simulation mode:")
+print("1 - Analyze a specific material")
+print("2 - Compare metals with fixed analyte (H2O_central)")
+mode = input("Mode (1 or 2): ").strip()
 
-if modo == "1":
-    substrato, metal = selecionar_materiais()
-    resultados = executar_simulacao_reflectancia(
-        substrato, metal, analitos,
+if mode == "1":
+    substrate, metal = select_materials()
+    results = run_reflectance_simulation(
+        substrate, metal, analytes,
         materials, lambda0, theta_deg, theta_rad,
-        d_cr, d_analito, espessuras_metal_nm
+        d_cr, d_analyte, metal_thicknesses_nm
     )
-    calcular_todas_figuras_de_merito(resultados, materials, metal)
-    plotar_figuras_de_merito(resultados, espessuras_metal_nm)
+    calculate_all_figures_of_merit(results, materials, metal)
+    plot_figures_of_merit(results, metal_thicknesses_nm)
 
-elif modo == "2":
-    print("\nModo comparação entre metais selecionado.")
-    print("Escolha o substrato fixo: PMMA, PC ou TOPAS")
-    substrato_input = input("Substrato: ").strip().upper()
-    mapa_nomes = {"PMMA": "PMMA", "PC": "PC", "TOPAS": "TOPAS"}
-    if substrato_input not in mapa_nomes:
-        raise ValueError("Substrato inválido.")
-    substrato = mapa_nomes[substrato_input]
+elif mode == "2":
+    print("\nComparison mode selected.")
+    print("Select fixed substrate: PMMA, PC, or TOPAS")
+    substrate_input = input("Substrate: ").strip().upper()
+    name_map = {"PMMA": "PMMA", "PC": "PC", "TOPAS": "TOPAS"}
+    if substrate_input not in name_map:
+        raise ValueError("Invalid substrate.")
+    substrate = name_map[substrate_input]
 
-    resultados_comp = {
+    comparison_results = {
         "theta_res": {},
         "fwhm": {},
-        "sensibilidade": {},
+        "sensitivity": {},
         "chi": {},
         "q": {}
     }
 
     for metal in ["Ag", "Au", "Cu"]:
-        print(f"\nSimulando para metal: {metal}")
-        resultados_metal = executar_simulacao_reflectancia(
-            substrato, metal, ["H2O_central"],
+        print(f"\nSimulating for metal: {metal}")
+        metal_results = run_reflectance_simulation(
+            substrate, metal, ["H2O_central"],
             materials, lambda0, theta_deg, theta_rad,
-            d_cr, d_analito, espessuras_metal_nm
+            d_cr, d_analyte, metal_thicknesses_nm
         )
 
-        theta = resultados_metal["theta_res"][(metal, "H2O_central")]
-        fwhm = resultados_metal["fwhm"][(metal, "H2O_central")]
+        theta = metal_results["theta_res"][(metal, "H2O_central")]
+        fwhm = metal_results["fwhm"][(metal, "H2O_central")]
 
-        resultados_comp["theta_res"][metal] = theta
-        resultados_comp["fwhm"][metal] = fwhm
-        resultados_comp["sensibilidade"][metal] = [np.nan] * len(theta)
-        resultados_comp["chi"][metal] = [np.nan] * len(theta)
-        resultados_comp["q"][metal] = [calcular_q(t, f) for t, f in zip(theta, fwhm)]
+        comparison_results["theta_res"][metal] = theta
+        comparison_results["fwhm"][metal] = fwhm
+        comparison_results["sensitivity"][metal] = [np.nan] * len(theta)
+        comparison_results["chi"][metal] = [np.nan] * len(theta)
+        comparison_results["q"][metal] = [calculate_q(t, f) for t, f in zip(theta, fwhm)]
 
-    print("\nPlotando comparações entre metais...")
-    plotar_figuras_de_merito(resultados_comp, espessuras_metal_nm)
+    print("\nPlotting metal comparison...")
+    plot_figures_of_merit(comparison_results, metal_thicknesses_nm)
 
 else:
-    print("Opção inválida. Finalizando programa.")
+    print("Invalid option. Exiting program.")
