@@ -21,9 +21,9 @@ This simulator serves as a support tool for scientific research in the context o
 - Comparison between AIM and WIM methods
 - Validation of numerical models using commercial software (e.g., COMSOL)
 
-## 🧱 Project Structure
-
+## 🧱 Project Structure 
 Simulator_SPR_AIM_WIM/
+```
 ├── main.py
 ├── fresnel_utils.py
 ├── reflectance_simulator.py
@@ -35,8 +35,8 @@ Simulator_SPR_AIM_WIM/
 ├── merit_figures_plot.py
 ├── .gitignore
 ├── README.md
-└── pycache/
-
+└── __pycache__/
+```
 ## 🧰 Software Requirements
 
 - Python 3.10+
