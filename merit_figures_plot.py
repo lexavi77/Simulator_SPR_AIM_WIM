@@ -3,12 +3,25 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 
 def plot_figures_of_merit(results, metal_thicknesses_nm):
-    metrics = ["theta_res", "fwhm", "sensitivity", "chi", "q"]
+    metrics = [
+        "theta_res",
+        "fwhm",
+        "fwhm_nm",
+        "sensitivity",
+        "s_lambda",
+        "chi",
+        "chi_lambda",
+        "q"
+    ]
+
     titles = {
         "theta_res": "Resonance Angle (°)",
         "fwhm": "FWHM (°)",
-        "sensitivity": "Sensitivity (°/RIU)",
-        "chi": "Chi Parameter (χ)",
+        "fwhm_nm": "FWHM (nm)",
+        "sensitivity": "Angular Sensitivity (°/RIU)",
+        "s_lambda": "Spectral Sensitivity (nm/RIU)",
+        "chi": "Angular Chi (χ)",
+        "chi_lambda": "Spectral Chi (χλ)",
         "q": "Q Factor"
     }
 
@@ -34,7 +47,7 @@ def plot_figures_of_merit(results, metal_thicknesses_nm):
                 y_smooth = spline(x_fine)
                 plt.plot(x_fine, y_smooth, label=str(key))
             else:
-                plt.plot(x, y, 'o-', label=str(key))  # fallback without smoothing
+                plt.plot(x, y, 'o-', label=str(key))  # fallback sem suavização
 
         if has_valid_data:
             plt.xlabel("Metal Thickness (nm)")

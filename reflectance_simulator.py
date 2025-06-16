@@ -8,7 +8,10 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
                                 d_cr, d_analyte, metal_thicknesses_nm):
     results = {
         "theta_res": {},
-        "fwhm": {}
+        "fwhm": {},
+        "substrate": substrate,
+        "theta_deg": theta_deg,
+        "reflectance": {}
     }
 
     for analyte in analytes:
@@ -17,12 +20,10 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
 
         theta_res_list = []
         fwhm_list = []
+        reflectance_list = []  # ⬅️ novo: lista temporária de curvas Rp
 
         for d_metal_nm in metal_thicknesses_nm:
             d_metal = d_metal_nm * 1e-9
-            # The transfer matrix routine expects thickness values only for the
-            # internal layers (here: adhesion layer and metal film). The
-            # analyte is treated as a semi-infinite medium, so its thickness is omitted.
             d = np.array([d_cr, d_metal])
             n = np.array([
                 materials[substrate],
@@ -40,11 +41,14 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
 
             theta_res_list.append(theta_res)
             fwhm_list.append(fwhm)
+            reflectance_list.append(Rp)  # ⬅️ armazena a curva para cada espessura
 
             plt.plot(theta_deg, Rp, label=f'{d_metal_nm} nm | θres ≈ {theta_res:.2f}°')
 
+        # Após a varredura das espessuras:
         results["theta_res"][(metal, analyte)] = theta_res_list
         results["fwhm"][(metal, analyte)] = fwhm_list
+        results["reflectance"][(metal, analyte)] = reflectance_list  # ⬅️ salva tudo
 
         plt.title(f"SPR - Substrate: {substrate}, Metal: {metal}, Analyte: {analyte}")
         plt.xlabel("Incidence Angle (°)")
