@@ -1,39 +1,34 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
-from fresnel_utils import getFresnelAIM
 from optical_data import materials
 from simulation_config import (
     lambda0, theta_deg, theta_rad,
     d_cr, d_analyte, metal_thicknesses_nm, analytes
 )
 from user_input import select_materials
+from fresnel_utils import getFresnelAIM
+from reflectance_simulator import run_reflectance_simulation
 from calculate_figures import calculate_all_figures_of_merit
 from merit_figures_plot import plot_figures_of_merit
-from reflectance_simulator import run_reflectance_simulation
 from save_results import save_results_to_csv
+from plot_reflectance_full import plot_reflectance_22_curves
 
-# ------------------- Main Function -------------------
-
-for metal in ["Ag", "Au", "Cu"]:
-    n_complex = materials[metal]
-    eps = n_complex ** 2
-    print(f"{metal}: n = {n_complex}, ε = {eps}, ε_real = {eps.real}")
 
 def main():
     print("Select simulation mode:")
     print("1 - Analyze a specific material")
     print("2 - Compare metals with fixed analyte (H2O_central)")
-    mode = input("Mode (1 or 2): ").strip()
+    print("3 - Plot 22 reflectance curves per metal (final report requirement)")
+    mode = input("Mode (1, 2 or 3): ").strip()
 
     if mode == "1":
         run_mode_1()
     elif mode == "2":
         run_mode_2()
+    elif mode == "3":
+        run_mode_3()
     else:
         print("Invalid option. Exiting program.")
 
-# ------------------- MODE 1: Specific Material -------------------
 
 def run_mode_1():
     substrate, metal = select_materials()
@@ -50,14 +45,11 @@ def run_mode_1():
     calculate_all_figures_of_merit(results, materials, metal)
     plot_figures_of_merit(results, metal_thicknesses_nm)
 
-# ------------------- MODE 2: Metal Comparison -------------------
 
 def run_mode_2():
-    print("\nComparison mode selected.")
-    substrate_input = input("Select fixed substrate (PMMA, PC, TOPAS): ").strip().upper()
-    valid_substrates = {"PMMA", "PC", "TOPAS"}
-
-    if substrate_input not in valid_substrates:
+    print("\n[MODE 2] Metal comparison selected.")
+    substrate_input = input("Select substrate (PMMA, PC, TOPAS): ").strip().upper()
+    if substrate_input not in {"PMMA", "PC", "TOPAS"}:
         raise ValueError("Invalid substrate.")
     substrate = substrate_input
 
@@ -76,7 +68,6 @@ def run_mode_2():
     for metal in ["Ag", "Au", "Cu"]:
         print(f"\nSimulating for metal: {metal}")
 
-        # Executes the 3 simulations
         res_low = run_reflectance_simulation(
             substrate, metal, ["H2O_low"],
             materials, lambda0, theta_deg, theta_rad,
@@ -93,7 +84,6 @@ def run_mode_2():
             d_cr, d_analyte, metal_thicknesses_nm
         )
 
-        # Prepares the dictionary with all data for metric calculations
         results = {
             "theta_res": {},
             "fwhm": {},
@@ -102,18 +92,14 @@ def run_mode_2():
             "substrate": substrate
         }
 
-        # Combines the results of the 3 simulations
         results["theta_res"].update(res_low["theta_res"])
         results["theta_res"].update(res_high["theta_res"])
         results["theta_res"].update(res_central["theta_res"])
-
         results["fwhm"].update(res_central["fwhm"])
         results["reflectance"].update(res_central["reflectance"])
 
-        # Calculates all figures of merit
         calculate_all_figures_of_merit(results, materials, metal)
 
-        # Stores the results for this metal
         comparison_results["theta_res"][metal] = results["theta_res"][(metal, "H2O_central")]
         comparison_results["fwhm"][metal] = results["fwhm"][(metal, "H2O_central")]
         comparison_results["sensitivity_empirical"][metal] = results["sensitivity_empirical"][metal]
@@ -123,12 +109,43 @@ def run_mode_2():
         comparison_results["q_empirical"][metal] = results["q_empirical"][metal]
         comparison_results["q_theoretical"][metal] = results["q_theoretical"][metal]
 
-    print("\nPlotting metal comparison...")
     plot_figures_of_merit(comparison_results, metal_thicknesses_nm)
 
-    # Exports results for each metal
     for metal in ["Ag", "Au", "Cu"]:
         save_results_to_csv(comparison_results, metal, filename=f"results_{metal}.csv")
+
+
+def run_mode_3():
+    print("\n[MODE 3] Plotting 22 reflectance curves per metal...")
+
+    substrate_input = input("Select substrate (PMMA, PC, TOPAS): ").strip().upper()
+    if substrate_input not in {"PMMA", "PC", "TOPAS"}:
+        raise ValueError("Invalid substrate.")
+    substrate = substrate_input
+
+    analytes_22 = ["H2O_low", "H2O_high"]
+
+    results = {
+        "theta_res": {},
+        "fwhm": {},
+        "reflectance": {},
+        "theta_deg": theta_deg,
+        "substrate": substrate
+    }
+
+    for metal in ["Ag", "Au", "Cu"]:
+        res = run_reflectance_simulation(
+            substrate, metal, analytes_22,
+            materials, lambda0, theta_deg, theta_rad,
+            d_cr, d_analyte, metal_thicknesses_nm
+        )
+
+        results["theta_res"].update(res["theta_res"])
+        results["fwhm"].update(res["fwhm"])
+        results["reflectance"].update(res["reflectance"])
+
+    plot_reflectance_22_curves(results, metal_thicknesses_nm)
+
 
 # ------------------- Execution -------------------
 

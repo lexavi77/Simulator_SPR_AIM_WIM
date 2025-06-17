@@ -1,7 +1,7 @@
 import numpy as np
 
 lambda0 = 850e-9  # wavelength
-theta_deg = np.linspace(40, 80, 1000)
+theta_deg = np.linspace(40, 80, 1500)
 theta_rad = np.radians(theta_deg)
 
 d_cr = 2e-9  # chromium adhesion layer thickness (if used)
