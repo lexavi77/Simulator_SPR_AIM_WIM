@@ -2,19 +2,17 @@ import pandas as pd
 
 def save_results_to_csv(results, metal, filename="results_spr.csv"):
     """
-    Salva as figuras de mérito empíricas e teóricas para um determinado metal em um arquivo CSV.
-
-    Parâmetros:
-    - results: dicionário com os resultados (como 'results' ou 'comparison_results')
-    - metal: string com o nome do metal (ex: 'Au')
-    - filename: nome do arquivo de saída
+    Saves the empirical and theoretical figures of merit for a given metal to a CSV file.
     """
-    thicknesses = results.get("metal_thicknesses_nm", list(range(45, 45 + len(results["theta_res"][(metal, "H2O_central")]))))
+    thicknesses = results.get(
+        "metal_thicknesses_nm",
+        list(range(45, 45 + len(results["theta_res"][metal])))
+    )
 
     df = pd.DataFrame({
         "Metal_Thickness_nm": thicknesses,
-        "Theta_res_deg": results["theta_res"][(metal, "H2O_central")],
-        "FWHM_deg": results["fwhm"][(metal, "H2O_central")],
+        "Theta_res_deg": results["theta_res"][metal],
+        "FWHM_deg": results["fwhm"][metal],
         
         # Empirical metrics
         "Sensitivity_Empirical_deg_per_RIU": results.get("sensitivity_empirical", {}).get(metal),
@@ -28,4 +26,4 @@ def save_results_to_csv(results, metal, filename="results_spr.csv"):
     })
 
     df.to_csv(filename, index=False)
-    print(f"[INFO] Resultados salvos em: {filename}")
+    print(f"[INFO] Results saved to: {filename}")

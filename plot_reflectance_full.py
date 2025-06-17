@@ -7,6 +7,8 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm):
     - 11 curves with negative analyte (solid line)
     - 11 curves with positive analyte (dashed line)
 
+    Legend includes only 2 entries: one for Low and one for High, with thickness range.
+
     Parameters:
     - results: dictionary returned by run_reflectance_simulation
     - metal_thicknesses_nm: list with simulated thicknesses (e.g., range(45, 56))
@@ -33,7 +35,14 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm):
 
             for i, Rp in enumerate(reflectances):
                 color = colors[i % len(colors)]
-                label = f"{analyte.replace('H2O_', '').capitalize()} - {metal_thicknesses_nm[i]} nm" if i == 0 else None
+                
+                # Apenas a primeira curva de cada grupo recebe label (para a legenda)
+                label = None
+                if i == 0:
+                    range_str = f"{metal_thicknesses_nm[0]}–{metal_thicknesses_nm[-1]} nm"
+                    tipo = analyte.replace("H2O_", "").capitalize()
+                    label = f"{tipo} - {range_str}"
+
                 plt.plot(theta_deg, Rp,
                          linestyle=linestyles[analyte],
                          linewidth=1.2,
@@ -41,7 +50,7 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm):
                          alpha=0.8,
                          label=label)
 
-        # Automatic adjustment of the X-axis based on simulated θres
+        # Ajusta o eixo X baseado nas posições de ressonância
         if (metal, "H2O_low") in results["theta_res"] and (metal, "H2O_high") in results["theta_res"]:
             all_theta = results["theta_res"][(metal, "H2O_low")] + results["theta_res"][(metal, "H2O_high")]
             if all_theta:
@@ -57,3 +66,4 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm):
         plt.tight_layout()
         plt.legend(fontsize=8, loc="best")
         plt.show()
+
