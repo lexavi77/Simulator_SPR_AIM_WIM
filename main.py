@@ -13,7 +13,12 @@ from merit_figures_plot import plot_figures_of_merit
 from reflectance_simulator import run_reflectance_simulation
 from save_results import save_results_to_csv
 
-# ------------------- Função principal -------------------
+# ------------------- Main Function -------------------
+
+for metal in ["Ag", "Au", "Cu"]:
+    n_complex = materials[metal]
+    eps = n_complex ** 2
+    print(f"{metal}: n = {n_complex}, ε = {eps}, ε_real = {eps.real}")
 
 def main():
     print("Select simulation mode:")
@@ -28,7 +33,7 @@ def main():
     else:
         print("Invalid option. Exiting program.")
 
-# ------------------- MODO 1: Material específico -------------------
+# ------------------- MODE 1: Specific Material -------------------
 
 def run_mode_1():
     substrate, metal = select_materials()
@@ -45,7 +50,7 @@ def run_mode_1():
     calculate_all_figures_of_merit(results, materials, metal)
     plot_figures_of_merit(results, metal_thicknesses_nm)
 
-# ------------------- MODO 2: Comparação entre metais -------------------
+# ------------------- MODE 2: Metal Comparison -------------------
 
 def run_mode_2():
     print("\nComparison mode selected.")
@@ -59,19 +64,19 @@ def run_mode_2():
     comparison_results = {
         "theta_res": {},
         "fwhm": {},
-        "fwhm_nm": {},
-        "sensitivity": {},
-        "s_lambda": {},
-        "chi": {},
-        "chi_lambda": {},
-        "q": {},
+        "sensitivity_empirical": {},
+        "sensitivity_theoretical": {},
+        "chi_empirical": {},
+        "chi_theoretical": {},
+        "q_empirical": {},
+        "q_theoretical": {},
         "metal_thicknesses_nm": metal_thicknesses_nm
     }
 
     for metal in ["Ag", "Au", "Cu"]:
         print(f"\nSimulating for metal: {metal}")
 
-        # Executa as 3 simulações
+        # Executes the 3 simulations
         res_low = run_reflectance_simulation(
             substrate, metal, ["H2O_low"],
             materials, lambda0, theta_deg, theta_rad,
@@ -88,7 +93,7 @@ def run_mode_2():
             d_cr, d_analyte, metal_thicknesses_nm
         )
 
-        # Prepara o dicionário com todos os dados para cálculo das métricas
+        # Prepares the dictionary with all data for metric calculations
         results = {
             "theta_res": {},
             "fwhm": {},
@@ -97,7 +102,7 @@ def run_mode_2():
             "substrate": substrate
         }
 
-        # Combina os resultados das 3 simulações
+        # Combines the results of the 3 simulations
         results["theta_res"].update(res_low["theta_res"])
         results["theta_res"].update(res_high["theta_res"])
         results["theta_res"].update(res_central["theta_res"])
@@ -105,27 +110,27 @@ def run_mode_2():
         results["fwhm"].update(res_central["fwhm"])
         results["reflectance"].update(res_central["reflectance"])
 
-        # Calcula todas as figuras de mérito
+        # Calculates all figures of merit
         calculate_all_figures_of_merit(results, materials, metal)
 
-        # Armazena os resultados para esse metal
+        # Stores the results for this metal
         comparison_results["theta_res"][metal] = results["theta_res"][(metal, "H2O_central")]
         comparison_results["fwhm"][metal] = results["fwhm"][(metal, "H2O_central")]
-        comparison_results["fwhm_nm"][metal] = results["fwhm_nm"][metal]
-        comparison_results["sensitivity"][metal] = results["sensitivity"][metal]
-        comparison_results["s_lambda"][metal] = results["s_lambda"][metal]
-        comparison_results["chi"][metal] = results["chi"][metal]
-        comparison_results["chi_lambda"][metal] = results["chi_lambda"][metal]
-        comparison_results["q"][metal] = results["q"][metal]
+        comparison_results["sensitivity_empirical"][metal] = results["sensitivity_empirical"][metal]
+        comparison_results["sensitivity_theoretical"][metal] = results["sensitivity_theoretical"][metal]
+        comparison_results["chi_empirical"][metal] = results["chi_empirical"][metal]
+        comparison_results["chi_theoretical"][metal] = results["chi_theoretical"][metal]
+        comparison_results["q_empirical"][metal] = results["q_empirical"][metal]
+        comparison_results["q_theoretical"][metal] = results["q_theoretical"][metal]
 
     print("\nPlotting metal comparison...")
     plot_figures_of_merit(comparison_results, metal_thicknesses_nm)
 
-    # Exporta resultados por metal
+    # Exports results for each metal
     for metal in ["Ag", "Au", "Cu"]:
         save_results_to_csv(comparison_results, metal, filename=f"results_{metal}.csv")
 
-# ------------------- Execução -------------------
+# ------------------- Execution -------------------
 
 if __name__ == "__main__":
     main()

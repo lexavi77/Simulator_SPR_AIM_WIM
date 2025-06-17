@@ -2,25 +2,23 @@ from performance_metrics import (
     calculate_sensitivity,
     calculate_chi,
     calculate_q,
-    calculate_fwhm_nm,
-    calculate_spectral_sensitivity_from_theta  # ⬅️ novo
+    calculate_theoretical_sensitivity
 )
 
-from simulation_config import lambda0  # lambda0 em metros (850e-9)
-
 def calculate_all_figures_of_merit(results, materials, metal):
-    if "sensitivity" not in results:
-        results["sensitivity"] = {}
-    if "chi" not in results:
-        results["chi"] = {}
-    if "q" not in results:
-        results["q"] = {}
-    if "fwhm_nm" not in results:
-        results["fwhm_nm"] = {}
-    if "s_lambda" not in results:
-        results["s_lambda"] = {}  # ⬅️ novo
-    if "chi_lambda" not in results:
-        results["chi_lambda"] = {}  # ⬅️ novo
+    if "sensitivity_empirical" not in results:
+        results["sensitivity_empirical"] = {}
+    if "chi_empirical" not in results:
+        results["chi_empirical"] = {}
+    if "q_empirical" not in results:
+        results["q_empirical"] = {}
+
+    if "sensitivity_theoretical" not in results:
+        results["sensitivity_theoretical"] = {}
+    if "chi_theoretical" not in results:
+        results["chi_theoretical"] = {}
+    if "q_theoretical" not in results:
+        results["q_theoretical"] = {}
 
     theta_low = results["theta_res"][(metal, "H2O_low")]
     theta_high = results["theta_res"][(metal, "H2O_high")]
@@ -28,46 +26,33 @@ def calculate_all_figures_of_merit(results, materials, metal):
     fwhm_central = results["fwhm"][(metal, "H2O_central")]
 
     delta_n = materials["H2O_high"].real - materials["H2O_low"].real
-    n_prisma = materials[results["substrate"]].real
-    theta_deg = results["theta_deg"]
 
-    # --- FWHM espectral (nm)
-    fwhm_nm_list = []
-    for Rp_curve in results["reflectance"][(metal, "H2O_central")]:
-        fwhm_nm = calculate_fwhm_nm(
-            Rp_curve,
-            theta_deg,
-            lambda0 * 1e9,  # para nm
-            n_prisma
-        )
-        fwhm_nm_list.append(fwhm_nm)
-
-    # --- Sensibilidade angular e figuras de mérito angulares
-    sensitivity = [
+    # --- Sensibilidade empírica e figuras de mérito associadas
+    sensitivity_empirical = [
         calculate_sensitivity(th, tl, materials["H2O_high"].real, materials["H2O_low"].real)
         for th, tl in zip(theta_high, theta_low)
     ]
-    chi = [calculate_chi(s, f) for s, f in zip(sensitivity, fwhm_central)]
-    q = [calculate_q(t, f) for t, f in zip(theta_central, fwhm_central)]
+    chi_empirical = [calculate_chi(s, f) for s, f in zip(sensitivity_empirical, fwhm_central)]
+    q_empirical = [calculate_q(t, f) for t, f in zip(theta_central, fwhm_central)]
 
-    # --- Sensibilidade espectral (nm/RIU) e χ espectral
-    s_lambda = calculate_spectral_sensitivity_from_theta(
-        theta_res_high=theta_high,
-        theta_res_low=theta_low,
-        lambda0_nm=lambda0 * 1e9,
-        n_prisma=n_prisma,
-        n_high=materials["H2O_high"].real,
-        n_low=materials["H2O_low"].real
-    )
-    chi_lambda = [
-        s / f if f != 0 else np.nan
-        for s, f in zip(s_lambda, fwhm_nm_list)
+    results["sensitivity_empirical"][metal] = sensitivity_empirical
+    results["chi_empirical"][metal] = chi_empirical
+    results["q_empirical"][metal] = q_empirical
+
+    # --- Sensibilidade teórica e figuras de mérito associadas
+    n_eff_s = materials["H2O_high"].real  # conforme especificado nas orientações
+    n2 = materials[results["substrate"]].real
+
+    eps_metal = materials[metal] ** 2
+    eps_mr = eps_metal.real
+
+    sensitivity_theoretical = [
+        calculate_theoretical_sensitivity(eps_mr, n_eff_s, n2)
+        for _ in theta_central  # uma vez por espessura
     ]
+    chi_theoretical = [calculate_chi(s, f) for s, f in zip(sensitivity_theoretical, fwhm_central)]
+    q_theoretical = [calculate_q(t, f) for t, f in zip(theta_central, fwhm_central)]
 
-    # --- Armazenamento dos resultados
-    results["sensitivity"][metal] = sensitivity
-    results["chi"][metal] = chi
-    results["q"][metal] = q
-    results["fwhm_nm"][metal] = fwhm_nm_list
-    results["s_lambda"][metal] = s_lambda
-    results["chi_lambda"][metal] = chi_lambda
+    results["sensitivity_theoretical"][metal] = sensitivity_theoretical
+    results["chi_theoretical"][metal] = chi_theoretical
+    results["q_theoretical"][metal] = q_theoretical

@@ -6,23 +6,23 @@ def plot_figures_of_merit(results, metal_thicknesses_nm):
     metrics = [
         "theta_res",
         "fwhm",
-        "fwhm_nm",
-        "sensitivity",
-        "s_lambda",
-        "chi",
-        "chi_lambda",
-        "q"
+        "sensitivity_empirical",
+        "sensitivity_theoretical",
+        "chi_empirical",
+        "chi_theoretical",
+        "q_empirical",
+        "q_theoretical"
     ]
 
     titles = {
         "theta_res": "Resonance Angle (°)",
         "fwhm": "FWHM (°)",
-        "fwhm_nm": "FWHM (nm)",
-        "sensitivity": "Angular Sensitivity (°/RIU)",
-        "s_lambda": "Spectral Sensitivity (nm/RIU)",
-        "chi": "Angular Chi (χ)",
-        "chi_lambda": "Spectral Chi (χλ)",
-        "q": "Q Factor"
+        "sensitivity_empirical": "Empirical Sensitivity (°/RIU)",
+        "sensitivity_theoretical": "Theoretical Sensitivity (°/RIU)",
+        "chi_empirical": "Empirical χ (°⁻¹)",
+        "chi_theoretical": "Theoretical χ (°⁻¹)",
+        "q_empirical": "Empirical Q",
+        "q_theoretical": "Theoretical Q"
     }
 
     for metric in metrics:
