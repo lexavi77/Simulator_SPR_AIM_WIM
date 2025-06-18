@@ -19,7 +19,7 @@ def main():
     print("1 - Analyze a specific material")
     print("2 - Compare metals with fixed analyte (H2O_central)")
     print("3 - Plot 22 reflectance curves per metal (final report requirement)")
-    print("4 - Plot sensitive structure (PMMA + d=55nm) for 3 metals (6 analytes)")
+    print("4 - Plot sensitive structure (TOPAS + d=55nm) for 3 metals (6 analytes)")
     mode = input("Mode (1, 2, 3 or 4): ").strip()
 
     if mode == "1":
@@ -35,8 +35,10 @@ def main():
 
 
 def run_mode_1():
+    # Select substrate and metal from user
     substrate, metal = select_materials()
 
+    # Run simulation
     results = run_reflectance_simulation(
         substrate, metal, analytes,
         materials, lambda0, theta_deg, theta_rad,
@@ -46,6 +48,7 @@ def run_mode_1():
     results["theta_deg"] = theta_deg
     results["substrate"] = substrate
 
+    # Compute and plot figures of merit
     calculate_all_figures_of_merit(results, materials, metal)
     plot_figures_of_merit(results, metal_thicknesses_nm)
 
@@ -113,8 +116,8 @@ def run_mode_2():
         comparison_results["q_empirical"][metal] = results["q_empirical"][metal]
         comparison_results["q_theoretical"][metal] = results["q_theoretical"][metal]
 
+    # Final plotting and export
     plot_figures_of_merit(comparison_results, metal_thicknesses_nm)
-
     for metal in ["Ag", "Au", "Cu"]:
         save_results_to_csv(comparison_results, metal, filename=f"results_{metal}.csv")
 
@@ -159,7 +162,6 @@ def run_mode_4():
         materials, lambda0, theta_deg, theta_rad,
         d_cr, d_analyte, substrate, metals
     )
-
 
 
 # ------------------- Execution -------------------
