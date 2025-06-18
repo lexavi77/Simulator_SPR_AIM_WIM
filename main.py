@@ -11,6 +11,7 @@ from calculate_figures import calculate_all_figures_of_merit
 from merit_figures_plot import plot_figures_of_merit
 from save_results import save_results_to_csv
 from plot_reflectance_full import plot_reflectance_22_curves
+from plot_sensitive_structure import plot_angular_response_for_sensitive_structure_and_export_csv
 
 
 def main():
@@ -18,7 +19,8 @@ def main():
     print("1 - Analyze a specific material")
     print("2 - Compare metals with fixed analyte (H2O_central)")
     print("3 - Plot 22 reflectance curves per metal (final report requirement)")
-    mode = input("Mode (1, 2 or 3): ").strip()
+    print("4 - Plot sensitive structure (PMMA + d=55nm) for 3 metals (6 analytes)")
+    mode = input("Mode (1, 2, 3 or 4): ").strip()
 
     if mode == "1":
         run_mode_1()
@@ -26,6 +28,8 @@ def main():
         run_mode_2()
     elif mode == "3":
         run_mode_3()
+    elif mode == "4":
+        run_mode_4()
     else:
         print("Invalid option. Exiting program.")
 
@@ -145,6 +149,17 @@ def run_mode_3():
         results["reflectance"].update(res["reflectance"])
 
     plot_reflectance_22_curves(results, metal_thicknesses_nm)
+
+
+def run_mode_4():
+    print("\n[MODE 4] Plotting sensitive structures (TOPAS + d=55nm) for Ag, Au, Cu")
+    substrate = "TOPAS"
+    metals = ["Ag", "Au", "Cu"]
+    plot_angular_response_for_sensitive_structure_and_export_csv(
+        materials, lambda0, theta_deg, theta_rad,
+        d_cr, d_analyte, substrate, metals
+    )
+
 
 
 # ------------------- Execution -------------------

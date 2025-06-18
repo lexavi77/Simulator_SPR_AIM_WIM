@@ -6,14 +6,33 @@ def calculate_theta_res(Rp, theta_deg):
     idx_min = np.argmin(Rp)
     return theta_deg[idx_min]
 
-def calculate_theta_res_smooth(Rp, theta_deg):
-    spline = CubicSpline(theta_deg, Rp)
-    result = minimize_scalar(spline, bounds=(theta_deg[0], theta_deg[-1]), method='bounded')
-    if result.success:
-        return result.x
-    else:
-        # Fallback to basic method if smoothing fails
-        return calculate_theta_res(Rp, theta_deg)
+def calculate_theta_res_smooth(theta_deg, Rp):
+    """
+    Calcula o ângulo de ressonância a partir de uma curva de refletância suavizada
+    usando interpolação cúbica e busca de mínimo.
+    """
+    # Garante que os dados estão em ordem crescente
+    sorted_indices = np.argsort(theta_deg)
+    theta_sorted = theta_deg[sorted_indices]
+    Rp_sorted = Rp[sorted_indices]
+
+    # Verificação adicional: se valores repetidos, remove
+    unique_indices = np.unique(theta_sorted, return_index=True)[1]
+    theta_sorted = theta_sorted[unique_indices]
+    Rp_sorted = Rp_sorted[unique_indices]
+
+    # Interpolação e busca do mínimo
+    try:
+        spline = CubicSpline(theta_sorted, Rp_sorted)
+        result = minimize_scalar(spline, bounds=(theta_sorted[0], theta_sorted[-1]), method='bounded')
+        if result.success:
+            return result.x
+    except Exception as e:
+        print("⚠️ Erro ao aplicar CubicSpline:", e)
+
+    # Fallback em caso de erro
+    return calculate_theta_res(Rp_sorted, theta_sorted)
+
 
 def calculate_fwhm(Rp, theta_deg):
     Rp_min = np.min(Rp)
