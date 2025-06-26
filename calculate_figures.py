@@ -20,38 +20,44 @@ def calculate_all_figures_of_merit(results, materials, metal):
     if "q_theoretical" not in results:
         results["q_theoretical"] = {}
 
-    theta_low = results["theta_res"][(metal, "H2O_low")]
-    theta_high = results["theta_res"][(metal, "H2O_high")]
-    theta_central = results["theta_res"][(metal, "H2O_central")]
-    fwhm_central = results["fwhm"][(metal, "H2O_central")]
+    # Extract angles for both analytes
+    theta_low = results["theta_res"][(metal, "analyte_01")]
+    theta_high = results["theta_res"][(metal, "analyte_02")]
+    fwhm_low = results["fwhm"][(metal, "analyte_01")]
+    fwhm_high = results["fwhm"][(metal, "analyte_02")]
 
-    delta_n = materials["H2O_high"].real - materials["H2O_low"].real
+    # Use average FWHM and theta for chi and Q
+    fwhm_avg = [(fl + fh) / 2 for fl, fh in zip(fwhm_low, fwhm_high)]
+    theta_avg = [(tl + th) / 2 for tl, th in zip(theta_low, theta_high)]
 
-    # --- Sensibilidade empírica e figuras de mérito associadas
+    n1 = materials["analyte_01"].real
+    n2 = materials["analyte_02"].real
+    delta_n = n2 - n1
+
+    # --- Empirical sensitivity and figures of merit
     sensitivity_empirical = [
-        calculate_sensitivity(th, tl, materials["H2O_high"].real, materials["H2O_low"].real)
+        calculate_sensitivity(th, tl, n2, n1)
         for th, tl in zip(theta_high, theta_low)
     ]
-    chi_empirical = [calculate_chi(s, f) for s, f in zip(sensitivity_empirical, fwhm_central)]
-    q_empirical = [calculate_q(t, f) for t, f in zip(theta_central, fwhm_central)]
+    chi_empirical = [calculate_chi(s, f) for s, f in zip(sensitivity_empirical, fwhm_avg)]
+    q_empirical = [calculate_q(t, f) for t, f in zip(theta_avg, fwhm_avg)]
 
     results["sensitivity_empirical"][metal] = sensitivity_empirical
     results["chi_empirical"][metal] = chi_empirical
     results["q_empirical"][metal] = q_empirical
 
-    # --- Sensibilidade teórica e figuras de mérito associadas
-    n_eff_s = materials["H2O_high"].real  # conforme especificado nas orientações
-    n2 = materials[results["substrate"]].real
-
+    # --- Theoretical sensitivity and figures of merit
+    n_eff_s = n2  # Use the higher analyte index
+    n_substrate = materials[results["substrate"]].real
     eps_metal = materials[metal] ** 2
     eps_mr = eps_metal.real
 
     sensitivity_theoretical = [
-        calculate_theoretical_sensitivity(eps_mr, n_eff_s, n2)
-        for _ in theta_central  # uma vez por espessura
+        calculate_theoretical_sensitivity(eps_mr, n_eff_s, n_substrate)
+        for _ in theta_avg
     ]
-    chi_theoretical = [calculate_chi(s, f) for s, f in zip(sensitivity_theoretical, fwhm_central)]
-    q_theoretical = [calculate_q(t, f) for t, f in zip(theta_central, fwhm_central)]
+    chi_theoretical = [calculate_chi(s, f) for s, f in zip(sensitivity_theoretical, fwhm_avg)]
+    q_theoretical = [calculate_q(t, f) for t, f in zip(theta_avg, fwhm_avg)]
 
     results["sensitivity_theoretical"][metal] = sensitivity_theoretical
     results["chi_theoretical"][metal] = chi_theoretical

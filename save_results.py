@@ -1,20 +1,22 @@
 import pandas as pd
 
-def save_results_to_csv(results, metal, filename="results_spr.csv"):
+def save_results_to_csv(results, metal, analyte, filename="results_spr.csv"):
     """
-    Saves the empirical and theoretical figures of merit for a given metal to a CSV file.
+    Saves the empirical and theoretical figures of merit for a given metal-analyte pair to a CSV file.
     """
+    key = (metal, analyte)
+
     thicknesses = results.get(
         "metal_thicknesses_nm",
-        list(range(45, 45 + len(results["theta_res"][metal])))
+        list(range(45, 45 + len(results["theta_res"].get(key, []))))
     )
 
     df = pd.DataFrame({
         "Metal_Thickness_nm": thicknesses,
-        "Theta_res_deg": results["theta_res"][metal],
-        "FWHM_deg": results["fwhm"][metal],
-        
-        # Empirical metrics
+        "Theta_res_deg": results["theta_res"].get(key),
+        "FWHM_deg": results["fwhm"].get(key),
+
+        # Empirical metrics (use only once per metal)
         "Sensitivity_Empirical_deg_per_RIU": results.get("sensitivity_empirical", {}).get(metal),
         "Chi_Empirical": results.get("chi_empirical", {}).get(metal),
         "Q_Empirical": results.get("q_empirical", {}).get(metal),

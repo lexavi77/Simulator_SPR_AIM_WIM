@@ -15,9 +15,10 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
     }
 
     for analyte in analytes:
-        print(f"\nSimulating for analyte: {analyte}")
-        plt.figure(figsize=(10, 6))
+        readable_name = analyte.replace("_", " ").capitalize()
+        print(f"\nSimulating for {readable_name}...")
 
+        plt.figure(figsize=(10, 6))
         theta_res_list = []
         fwhm_list = []
         reflectance_list = []
@@ -49,15 +50,14 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
         results["fwhm"][(metal, analyte)] = fwhm_list
         results["reflectance"][(metal, analyte)] = reflectance_list
 
-        plt.title(f"SPR - Substrate: {substrate}, Metal: {metal}, Analyte: {analyte}")
+        plt.title(f"SPR - Substrate: {substrate}, Metal: {metal}, {readable_name}")
         plt.xlabel("Incidence Angle (°)")
         plt.ylabel("Reflectance")
         plt.grid(True)
         plt.legend(fontsize=9)
         plt.tight_layout()
 
-        # Ajuste automático do zoom no eixo X
-        if theta_res_list:  # evita erro se estiver vazio
+        if theta_res_list:
             theta_min = min(theta_res_list)
             theta_max = max(theta_res_list)
             padding = 1.5

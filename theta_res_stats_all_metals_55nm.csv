@@ -1,4 +1,4 @@
-Metal,Group,n_type,n_analyte,Theta_res (deg)
+Metal,Group,n_type,n_analyte (RIU),Theta_res (deg)
 Ag,negative,low,1.3471,63.698381924395
 Ag,negative,center,1.3481,63.79020181930333
 Ag,negative,high,1.3491,63.88233125695696

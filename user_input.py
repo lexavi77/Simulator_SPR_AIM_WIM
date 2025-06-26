@@ -1,19 +1,17 @@
 def select_materials():
-    name_map = {
-        "pmma": "PMMA",
-        "pc": "PC",
-        "topas": "TOPAS",
-        "ag": "Ag",
-        "au": "Au",
-        "cu": "Cu"
-    }
+    valid_substrates = ["PMMA", "PC", "TOPAS"]
+    valid_metals = ["Ag", "Au", "Cu"]
 
-    print("Choose the substrate: PMMA, PC, or TOPAS")
-    substrate_input = input("Substrate: ").strip().lower()
-    print("Choose the metal: Ag, Au, or Cu")
-    metal_input = input("Metal: ").strip().lower()
+    while True:
+        substrate = input("Select substrate (PMMA, PC, TOPAS): ").strip().upper()
+        if substrate in valid_substrates:
+            break
+        print("Invalid substrate. Please choose from: PMMA, PC, TOPAS.")
 
-    if substrate_input not in name_map or metal_input not in name_map:
-        raise ValueError("Invalid material.")
+    while True:
+        metal = input("Select metal (Ag, Au, Cu): ").strip().capitalize()
+        if metal in valid_metals:
+            break
+        print("Invalid metal. Please choose from: Ag, Au, Cu.")
 
-    return name_map[substrate_input], name_map[metal_input]
+    return substrate, metal

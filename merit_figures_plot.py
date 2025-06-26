@@ -26,11 +26,15 @@ def plot_figures_of_merit(results, metal_thicknesses_nm):
     }
 
     for metric in metrics:
+        metric_data = results.get(metric, {})
+        if not metric_data:
+            print(f"[INFO] No data found for metric: {metric}")
+            continue
+
         has_valid_data = False
 
-        for key in results.get(metric, {}):
+        for key, y in metric_data.items():
             x = metal_thicknesses_nm
-            y = results[metric][key]
 
             if all(np.isnan(y)):
                 print(f"[INFO] Skipping {metric} for {key}: all values are NaN.")
@@ -47,7 +51,7 @@ def plot_figures_of_merit(results, metal_thicknesses_nm):
                 y_smooth = spline(x_fine)
                 plt.plot(x_fine, y_smooth, label=str(key))
             else:
-                plt.plot(x, y, 'o-', label=str(key))  # fallback sem suavização
+                plt.plot(x, y, 'o-', label=str(key))  # fallback without smoothing
 
         if has_valid_data:
             plt.xlabel("Metal Thickness (nm)")

@@ -4,19 +4,16 @@ import numpy as np
 def plot_reflectance_22_curves(results, metal_thicknesses_nm):
     """
     Plots 3 graphs (one for each metal: Ag, Au, Cu), each with 22 reflectance curves:
-    - 11 curves with negative analyte (solid line)
-    - 11 curves with positive analyte (dashed line)
+    - 11 curves with analyte_01 (solid line)
+    - 11 curves with analyte_02 (dashed line)
 
-    Legend includes only 2 entries: one for Low and one for High, with thickness range.
-
-    Parameters:
-    - results: dictionary returned by run_reflectance_simulation
-    - metal_thicknesses_nm: list with simulated thicknesses (e.g., range(45, 56))
+    Legend includes only 2 entries: one for analyte_01 and one for analyte_02,
+    with thickness range.
     """
-    analytes = ["H2O_low", "H2O_high"]
+    analytes = ["analyte_01", "analyte_02"]
     linestyles = {
-        "H2O_low": "-",   # solid line (negative)
-        "H2O_high": "--"  # dashed line (positive)
+        "analyte_01": "-",   # solid line
+        "analyte_02": "--"   # dashed line
     }
     colors = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple",
               "tab:brown", "tab:pink", "tab:gray", "tab:olive", "tab:cyan", "black"]
@@ -35,13 +32,12 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm):
 
             for i, Rp in enumerate(reflectances):
                 color = colors[i % len(colors)]
-                
-                # Apenas a primeira curva de cada grupo recebe label (para a legenda)
+
+                # Only first curve of each analyte group gets a label
                 label = None
                 if i == 0:
                     range_str = f"{metal_thicknesses_nm[0]}–{metal_thicknesses_nm[-1]} nm"
-                    tipo = analyte.replace("H2O_", "").capitalize()
-                    label = f"{tipo} - {range_str}"
+                    label = f"{analyte.replace('_', ' ').capitalize()} - {range_str}"
 
                 plt.plot(theta_deg, Rp,
                          linestyle=linestyles[analyte],
@@ -50,9 +46,9 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm):
                          alpha=0.8,
                          label=label)
 
-        # Ajusta o eixo X baseado nas posições de ressonância
-        if (metal, "H2O_low") in results["theta_res"] and (metal, "H2O_high") in results["theta_res"]:
-            all_theta = results["theta_res"][(metal, "H2O_low")] + results["theta_res"][(metal, "H2O_high")]
+        # Adjust x-axis based on resonance angle range
+        if (metal, "analyte_01") in results["theta_res"] and (metal, "analyte_02") in results["theta_res"]:
+            all_theta = results["theta_res"][(metal, "analyte_01")] + results["theta_res"][(metal, "analyte_02")]
             if all_theta:
                 theta_min = min(all_theta)
                 theta_max = max(all_theta)
@@ -66,4 +62,3 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm):
         plt.tight_layout()
         plt.legend(fontsize=8, loc="best")
         plt.show()
-

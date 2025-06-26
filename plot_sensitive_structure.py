@@ -8,14 +8,18 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
     materials, lambda0, theta_deg, theta_rad,
     d_cr, d_analyte, substrate, metals
 ):
-    # Combine analytes into one list to preserve plotting order: low-center-high-low-center-high
+    # Define base refractive indices for negative and positive analyte groups
+    n_neg_base = 1.3481
+    n_pos_base = 1.3492
+
+    # Define analytes: low, center, high for each group
     analyte_list = [
-        (1.3481 - 0.001, "negative", "low"),
-        (1.3481,         "negative", "center"),
-        (1.3481 + 0.001, "negative", "high"),
-        (1.3492 - 0.001, "positive", "low"),
-        (1.3492,         "positive", "center"),
-        (1.3492 + 0.001, "positive", "high")
+        (n_neg_base - 0.001, "negative", "low"),
+        (n_neg_base,         "negative", "center"),
+        (n_neg_base + 0.001, "negative", "high"),
+        (n_pos_base - 0.001, "positive", "low"),
+        (n_pos_base,         "positive", "center"),
+        (n_pos_base + 0.001, "positive", "high")
     ]
 
     d_metal = 55e-9
@@ -48,7 +52,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
                 "Metal": metal,
                 "Group": group,
                 "n_type": n_type,
-                "n_analyte": f"{n_analyte:.4f}",
+                "n_analyte (RIU)": f"{n_analyte:.4f}",
                 "Theta_res (deg)": theta_res
             })
 
@@ -77,14 +81,14 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
                 "Metal": metal,
                 "Group": group,
                 "n_type": "mean",
-                "n_analyte": "-",
+                "n_analyte (RIU)": "-",
                 "Theta_res (deg)": mean_theta
             })
             all_data.append({
                 "Metal": metal,
                 "Group": group,
                 "n_type": "std",
-                "n_analyte": "-",
+                "n_analyte (RIU)": "-",
                 "Theta_res (deg)": std_theta
             })
 
