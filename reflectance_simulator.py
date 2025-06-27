@@ -5,6 +5,7 @@ from matplotlib.font_manager import FontProperties
 from fresnel_utils import getFresnelAIM
 from performance_metrics import calculate_theta_res, calculate_fwhm
 
+
 # Font configuration
 try:
     font_path = "/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf"
@@ -86,18 +87,16 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
         results["fwhm"][(metal, analyte)] = fwhm_list
         results["reflectance"][(metal, analyte)] = reflectance_list
 
-        # Labels and title
+        # Labels only (no title)
         if TNR:
-            plt.xlabel("Incidence Angle (°)", fontsize=14, fontproperties=TNR)
-            plt.ylabel("Reflectance", fontsize=14, fontproperties=TNR)
-            plt.title(f"SPR - Substrate: {substrate}, Metal: {metal}, {readable_name}", fontsize=15, fontproperties=TNR)
+            plt.xlabel("Angle (°)", fontsize=14, fontproperties=TNR)
+            plt.ylabel("Reflectance (a.u.)", fontsize=14, fontproperties=TNR)
             plt.xticks(fontsize=12, fontproperties=TNR)
             plt.yticks(fontsize=12, fontproperties=TNR)
             plt.legend(fontsize=9, prop=TNR, loc="best")
         else:
-            plt.xlabel("Incidence Angle (°)", fontsize=14)
-            plt.ylabel("Reflectance", fontsize=14)
-            plt.title(f"SPR - Substrate: {substrate}, Metal: {metal}, {readable_name}", fontsize=15)
+            plt.xlabel("Angle (°)", fontsize=14)
+            plt.ylabel("Reflectance (a.u.)", fontsize=14)
             plt.xticks(fontsize=12)
             plt.yticks(fontsize=12)
             plt.legend(fontsize=9, loc="best")
@@ -109,10 +108,10 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
             padding = 1.5
             plt.xlim(theta_min - padding, theta_max + padding)
 
+        plt.ylim(0, 1)
         plt.grid(True)
         plt.tight_layout()
 
-        # Save figure
         base = f"figures/reflectance_{substrate}_{metal}_{analyte}"
         plt.savefig(f"{base}.png", dpi=300, bbox_inches='tight')
         plt.savefig(f"{base}.eps", format='eps', bbox_inches='tight')

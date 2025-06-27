@@ -110,29 +110,27 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
         labels = [item[2] for item in legend_items]
 
         if TNR:
-            plt.title(f"Reflectance Curves\nSubstrate: {substrate}, Metal: {metal}, d = 55 nm",
-                      fontsize=15, fontproperties=TNR)
-            plt.xlabel("Incident Angle (°)", fontsize=14, fontproperties=TNR)
-            plt.ylabel("Reflectance (Rp)", fontsize=14, fontproperties=TNR)
+            plt.xlabel("Angle (°)", fontsize=14, fontproperties=TNR)
+            plt.ylabel("Reflectance (a.u.)", fontsize=14, fontproperties=TNR)
             plt.xticks(fontsize=12, fontproperties=TNR)
             plt.yticks(fontsize=12, fontproperties=TNR)
             plt.legend(handles, labels, loc="best", fontsize=9, prop=TNR)
         else:
-            plt.title(f"Reflectance Curves\nSubstrate: {substrate}, Metal: {metal}, d = 55 nm",
-                      fontsize=15)
-            plt.xlabel("Incident Angle (°)", fontsize=14)
-            plt.ylabel("Reflectance (Rp)", fontsize=14)
+            plt.xlabel("Angle (°)", fontsize=14)
+            plt.ylabel("Reflectance (a.u.)", fontsize=14)
             plt.xticks(fontsize=12)
             plt.yticks(fontsize=12)
             plt.legend(handles, labels, loc="best", fontsize=9)
 
+
         plt.grid(True)
         plt.tight_layout()
 
-        fname = os.path.join(save_dir, f"reflectance_curves_{metal}_55nm")
+        fname = os.path.join(save_dir, f"SPR_reflectance_{substrate}_{metal}_55nm")
         plt.savefig(f"{fname}.png", dpi=300)
         plt.savefig(f"{fname}.eps", format="eps", bbox_inches="tight")
         print(f"[INFO] Saved: {fname}.eps and .png")
+        plt.show()
         plt.close()
 
     df_all = pd.DataFrame(all_data)

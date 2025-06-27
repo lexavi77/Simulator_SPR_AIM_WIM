@@ -23,14 +23,6 @@ color_palette = [
 ]
 
 def plot_reflectance_22_curves(results, metal_thicknesses_nm, save_dir="outputs/reflectance_curves"):
-    from matplotlib.font_manager import FontProperties
-
-    try:
-        font_path = "/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf"
-        TNR = FontProperties(fname=font_path) if os.path.exists(font_path) else None
-    except Exception:
-        TNR = None
-
     analytes = ["analyte_01", "analyte_02"]
     linestyles = {"analyte_01": "-", "analyte_02": "--"}
     colors = [(0, 0.5, 0), (0, 0, 1), (0.93, 0.11, 0.14)]  # Green, Blue, Red
@@ -65,9 +57,9 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm, save_dir="outputs/
                 plt.xlim(min(all_theta) - 1.5, max(all_theta) + 1.5)
 
         plt.ylim(0, 1)
-        title = f"Reflectance Curves - {metal}"
-        xlabel = "Incidence Angle (°)"
-        ylabel = "Reflectance"
+        title = f"SPR - Metal: {metal}, Substrate: {results['substrate']}"
+        xlabel = "Angle (°)"
+        ylabel = "Reflectance (a.u.)"
 
         if TNR:
             plt.title(title, fontsize=15, fontproperties=TNR)
@@ -96,7 +88,6 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm, save_dir="outputs/
         plt.show()
         plt.close()
 
-
 def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figures_of_merit"):
     os.makedirs(save_dir, exist_ok=True)
 
@@ -110,8 +101,8 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figur
     titles = {
         "theta_res": ("Resonance Angle (°)", "Metal Thickness (nm)"),
         "fwhm": ("FWHM (°)", "Metal Thickness (nm)"),
-        "chi_empirical": ("Empirical χ (°⁻¹)", "Metal Thickness (nm)"),
-        "q_empirical": ("Empirical Q", "Metal Thickness (nm)")
+        "chi_empirical": ("Empirical χ (RIU⁻¹)", "Metal Thickness (nm)"),
+        "q_empirical": ("Empirical Q (a.u.)", "Metal Thickness (nm)")
     }
 
     for metric in metrics:
@@ -136,10 +127,8 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figur
             label = str(key)
             color = color_palette[idx % len(color_palette)]
 
-            # Black markers
             plt.plot(x, y, 'ko', markersize=5, markerfacecolor='black')
 
-            # Smoothed curve
             if len(x) >= 4 and not np.any(np.isnan(y)):
                 spline = CubicSpline(x, y)
                 x_fine = np.linspace(min(x), max(x), 500)
@@ -176,10 +165,7 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figur
             plt.savefig(path_png, format='png', dpi=300, bbox_inches='tight')
             print(f"[INFO] Saved: {path_eps} and {path_png}")
 
-            # Show the plot on screen
             plt.show()
-
-            # Close it afterwards to release memory
             plt.close()
         else:
             print(f"[INFO] Skipping plot for {metric}: no valid data to display.")
