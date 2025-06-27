@@ -8,29 +8,29 @@ def calculate_theta_res(Rp, theta_deg):
 
 def calculate_theta_res_smooth(theta_deg, Rp):
     """
-    Calcula o ângulo de ressonância a partir de uma curva de refletância suavizada
-    usando interpolação cúbica e busca de mínimo.
+    Calculates the resonance angle from a smoothed reflectance curve
+    using cubic interpolation and minimum search.
     """
-    # Garante que os dados estão em ordem crescente
+    # Ensures the data is in ascending order
     sorted_indices = np.argsort(theta_deg)
     theta_sorted = theta_deg[sorted_indices]
     Rp_sorted = Rp[sorted_indices]
 
-    # Verificação adicional: se valores repetidos, remove
+    # Additional check: if there are repeated values, remove them
     unique_indices = np.unique(theta_sorted, return_index=True)[1]
     theta_sorted = theta_sorted[unique_indices]
     Rp_sorted = Rp_sorted[unique_indices]
 
-    # Interpolação e busca do mínimo
+    # Interpolation and minimum search
     try:
         spline = CubicSpline(theta_sorted, Rp_sorted)
         result = minimize_scalar(spline, bounds=(theta_sorted[0], theta_sorted[-1]), method='bounded')
         if result.success:
             return result.x
     except Exception as e:
-        print("⚠️ Erro ao aplicar CubicSpline:", e)
+        print("⚠️ Error applying CubicSpline:", e)
 
-    # Fallback em caso de erro
+    # Fallback in case of error
     return calculate_theta_res(Rp_sorted, theta_sorted)
 
 
@@ -62,16 +62,16 @@ def calculate_q(theta_res, fwhm):
 
 def calculate_theoretical_sensitivity(eps_mr, n_eff_s, n2):
     """
-    Calcula a sensibilidade angular S (em graus/RIU) baseada na equação (3)
-    do artigo "Diffractive optical coupling element for surface plasmon resonance sensors".
+    Calculates the angular sensitivity S (in degrees/RIU) based on equation (3)
+    from the article "Diffractive optical coupling element for surface plasmon resonance sensors".
     
-    Parâmetros:
-        eps_mr   : Parte real da permissividade do metal (ε_mr)
-        n_eff_s  : Índice de refração efetivo do analito (n_s^eff)
-        n2       : Índice de refração do substrato (n2)
+    Parameters:
+        eps_mr   : Real part of the metal permittivity (ε_mr)
+        n_eff_s  : Effective refractive index of the analyte (n_s^eff)
+        n2       : Refractive index of the substrate (n2)
 
-    Retorno:
-        S_em_graus_por_RIU : sensibilidade angular (graus/RIU)
+    Returns:
+        S_in_degrees_per_RIU : Angular sensitivity (degrees/RIU)
     """
     numerator = eps_mr**2
     denominator = abs(eps_mr + n_eff_s**2)
@@ -79,7 +79,7 @@ def calculate_theoretical_sensitivity(eps_mr, n_eff_s, n2):
     root_term = eps_mr * n2**2 * (eps_mr + n_eff_s**2) - (eps_mr**2) * (n_eff_s**2)
 
     if root_term <= 0:
-        return np.nan  # Evita resultado complexo ou indefinido
+        return np.nan  # Avoids complex or undefined result
 
     sensitivity_rad = numerator / (denominator * np.sqrt(root_term))
     sensitivity_deg = sensitivity_rad * (180 / np.pi)

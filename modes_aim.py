@@ -1,5 +1,3 @@
-# modes_aim.py
-
 from user_input import select_materials
 from fresnel_utils import getFresnelAIM
 from reflectance_simulator import run_reflectance_simulation
@@ -13,7 +11,6 @@ from simulation_config import (
     lambda0, theta_deg, theta_rad,
     d_cr, d_analyte, metal_thicknesses_nm, analytes
 )
-
 
 def run_mode_1():
     substrate, metal = select_materials()
@@ -31,6 +28,7 @@ def run_mode_1():
     # Calculates figures of merit comparing analyte_01 and analyte_02
     calculate_all_figures_of_merit(results, materials, metal)
 
+    # Plot and save figures of merit
     plot_figures_of_merit(results, metal_thicknesses_nm)
 
 
@@ -62,15 +60,13 @@ def run_mode_2():
             d_cr, d_analyte, metal_thicknesses_nm
         )
 
-        # Copies reflectance, theta_res, fwhm
+        # Merge reflectance and performance metrics
         results["reflectance"].update(res["reflectance"])
         results["theta_res"].update(res["theta_res"])
         results["fwhm"].update(res["fwhm"])
 
-        # Calculates all figures of merit for comparison between analytes
         calculate_all_figures_of_merit(res, materials, metal)
 
-        # Copies calculated results to the main dictionary
         for key in ["sensitivity_empirical", "chi_empirical", "q_empirical",
                     "sensitivity_theoretical", "chi_theoretical", "q_theoretical"]:
             if key in res:
@@ -78,6 +74,7 @@ def run_mode_2():
                     results[key] = {}
                 results[key].update(res[key])
 
+    # Plot and save the 22 reflectance curves per metal
     plot_reflectance_22_curves(results, metal_thicknesses_nm)
 
 

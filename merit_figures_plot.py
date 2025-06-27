@@ -2,9 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 from matplotlib.font_manager import FontProperties
+import os
 
-# Caminho para a fonte Times New Roman
-TNR = FontProperties(fname="/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf")
+# Try to load Times New Roman; fallback to default
+try:
+    font_path = "/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf"
+    if os.path.exists(font_path):
+        TNR = FontProperties(fname=font_path)
+    else:
+        raise FileNotFoundError
+except FileNotFoundError:
+    print("[WARNING] Times New Roman not found. Falling back to default font.")
+    TNR = None
 
 def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir=None):
     metrics = [
@@ -21,7 +30,7 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir=None):
         "q_empirical": ("Empirical Q", "Metal Thickness (nm)")
     }
 
-    # Cores no estilo MATLAB
+    # MATLAB-like color palette
     color_palette = [
         (0, 0.5, 0),       # green
         (0, 0, 1),         # blue
@@ -40,7 +49,7 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir=None):
         has_valid_data = False
         plt.figure(figsize=(8, 5))
 
-        keys = sorted(metric_data.keys())[:6]  # limitar a 6 curvas
+        keys = sorted(metric_data.keys())[:6]
         for idx, key in enumerate(keys):
             y = metric_data[key]
             x = metal_thicknesses_nm
@@ -51,10 +60,8 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir=None):
             has_valid_data = True
             label = str(key)
 
-            # Pontos
             plt.plot(x, y, 'ko', markersize=5, markerfacecolor='black')
 
-            # Curva suavizada
             if len(x) >= 4 and not np.any(np.isnan(y)):
                 spline = CubicSpline(x, y)
                 x_fine = np.linspace(min(x), max(x), 500)
@@ -66,13 +73,23 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir=None):
 
         if has_valid_data:
             ylabel, xlabel = titles[metric]
-            plt.xlabel(xlabel, fontsize=14, fontproperties=TNR)
-            plt.ylabel(ylabel, fontsize=14, fontproperties=TNR)
-            plt.title(f"{ylabel} vs {xlabel}", fontsize=15, fontproperties=TNR)
-            plt.xticks(fontsize=12, fontproperties=TNR)
-            plt.yticks(fontsize=12, fontproperties=TNR)
+
+            if TNR:
+                plt.xlabel(xlabel, fontsize=14, fontproperties=TNR)
+                plt.ylabel(ylabel, fontsize=14, fontproperties=TNR)
+                plt.title(f"{ylabel} vs {xlabel}", fontsize=15, fontproperties=TNR)
+                plt.xticks(fontsize=12, fontproperties=TNR)
+                plt.yticks(fontsize=12, fontproperties=TNR)
+                plt.legend(fontsize=10, loc="best", prop=TNR)
+            else:
+                plt.xlabel(xlabel, fontsize=14)
+                plt.ylabel(ylabel, fontsize=14)
+                plt.title(f"{ylabel} vs {xlabel}", fontsize=15)
+                plt.xticks(fontsize=12)
+                plt.yticks(fontsize=12)
+                plt.legend(fontsize=10, loc="best")
+
             plt.grid(True)
-            plt.legend(fontsize=10, loc="best", prop=TNR)
             plt.tight_layout()
 
             if save_dir:
