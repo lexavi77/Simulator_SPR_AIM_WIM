@@ -5,8 +5,10 @@ import os
 from fresnel_utils import getFresnelAIM
 from performance_metrics import calculate_theta_res_smooth
 from matplotlib.font_manager import FontProperties
+from plot_style import apply_plot_style
+from plot_utils import save_figure
 
-# Try to load Times New Roman; fallback to default
+# Try to load Times New Roman
 try:
     font_path = "/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf"
     TNR = FontProperties(fname=font_path) if os.path.exists(font_path) else None
@@ -19,6 +21,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
     d_cr, d_analyte, substrate, metals,
     save_dir="output_sensitive_structure"
 ):
+    apply_plot_style()
     os.makedirs(save_dir, exist_ok=True)
 
     n_neg_base = 1.3481
@@ -40,7 +43,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
         plt.figure(figsize=(10, 6))
         color_map = ['blue', 'orange', 'green', 'red', 'purple', 'brown']
         all_thetas = {"positive": [], "negative": []}
-        legend_items = []
+        legend_handles = []
 
         for i, (n_analyte, group, n_type) in enumerate(analyte_list):
             n = np.array([
@@ -68,8 +71,9 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
             })
 
             label = f"n = {n_analyte:.4f}"
-            line = plt.plot(theta_deg, Rp, label=label, color=color_map[i])[0]
-            legend_items.append((n_analyte, line, label))
+            line, = plt.plot(theta_deg, Rp, color=color_map[i], linewidth=1.5, label=label)
+            plt.plot(theta_deg, Rp, 'ko', markersize=5, markerfacecolor='black', alpha=0.6)
+            legend_handles.append(line)
 
             x_min = max(theta_res - 2, theta_deg[0])
             x_max = min(theta_res + 2, theta_deg[-1])
@@ -105,31 +109,25 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
                 }
             ])
 
-        legend_items.sort(key=lambda x: x[0])
-        handles = [item[1] for item in legend_items]
-        labels = [item[2] for item in legend_items]
-
         if TNR:
             plt.xlabel("Angle (°)", fontsize=14, fontproperties=TNR)
             plt.ylabel("Reflectance (a.u.)", fontsize=14, fontproperties=TNR)
             plt.xticks(fontsize=12, fontproperties=TNR)
             plt.yticks(fontsize=12, fontproperties=TNR)
-            plt.legend(handles, labels, loc="best", fontsize=9, prop=TNR)
+            plt.legend(handles=legend_handles, loc="best", fontsize=9, prop=TNR)
         else:
             plt.xlabel("Angle (°)", fontsize=14)
             plt.ylabel("Reflectance (a.u.)", fontsize=14)
             plt.xticks(fontsize=12)
             plt.yticks(fontsize=12)
-            plt.legend(handles, labels, loc="best", fontsize=9)
-
+            plt.legend(handles=legend_handles, loc="best", fontsize=9)
 
         plt.grid(True)
+        plt.title("")  # Garante ausência de título
         plt.tight_layout()
 
-        fname = os.path.join(save_dir, f"SPR_reflectance_{substrate}_{metal}_55nm")
-        plt.savefig(f"{fname}.png", dpi=300)
-        plt.savefig(f"{fname}.eps", format="eps", bbox_inches="tight")
-        print(f"[INFO] Saved: {fname}.eps and .png")
+        fname = os.path.join(save_dir, f"spr_reflectance_{substrate.lower()}_{metal.lower()}_55nm")
+        save_figure(fname)
         plt.show()
         plt.close()
 

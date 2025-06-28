@@ -1,44 +1,41 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 from scipy.interpolate import CubicSpline
 from matplotlib.font_manager import FontProperties
-import os
+from plot_utils import save_figure
 
-# Try to load Times New Roman; fallback to default
+# Font config
 try:
     font_path = "/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf"
-    if os.path.exists(font_path):
-        TNR = FontProperties(fname=font_path)
-    else:
-        raise FileNotFoundError
-except FileNotFoundError:
-    print("[WARNING] Times New Roman not found. Falling back to default font.")
+    TNR = FontProperties(fname=font_path) if os.path.exists(font_path) else None
+except Exception:
     TNR = None
+    print("[WARNING] Times New Roman not found. Using default font.")
 
-def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir=None):
-    metrics = [
-        "theta_res",
-        "fwhm",
-        "chi_empirical",
-        "q_empirical"
-    ]
+# Color palette
+color_palette = [
+    (0, 0.5, 0), (0, 0, 1), (0.93, 0.11, 0.14),
+    (0, 0.75, 0.75), (0.75, 0, 0.75), (0.75, 0.75, 0)
+]
+
+# Analyte label mapping
+name_map = {
+    "analyte_01": "positive",
+    "analyte_02": "negative"
+}
+
+def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figures_of_merit"):
+    os.makedirs(save_dir, exist_ok=True)
+
+    metrics = ["theta_res", "fwhm", "chi_empirical", "q_empirical"]
 
     titles = {
-        "theta_res": ("Resonance Angle (°)", "Metal Thickness (nm)"),
-        "fwhm": ("FWHM (°)", "Metal Thickness (nm)"),
-        "chi_empirical": ("Empirical χ (°⁻¹)", "Metal Thickness (nm)"),
-        "q_empirical": ("Empirical Q", "Metal Thickness (nm)")
+        "theta_res": (r"Resonance Angle (°)", "Metal Thickness (nm)"),
+        "fwhm": (r"FWHM (°)", "Metal Thickness (nm)"),
+        "chi_empirical": (r"$\chi\ (\mathrm{RIU}^{-1})$", "Metal Thickness (nm)"),
+        "q_empirical": (r"$Q\ (\mathrm{a.u.})$", "Metal Thickness (nm)")
     }
-
-    # MATLAB-like color palette
-    color_palette = [
-        (0, 0.5, 0),       # green
-        (0, 0, 1),         # blue
-        (0.93, 0.11, 0.14),# red
-        (0, 0.75, 0.75),   # cyan
-        (0.75, 0, 0.75),   # magenta
-        (0.75, 0.75, 0)    # yellow
-    ]
 
     for metric in metrics:
         metric_data = results.get(metric, {})
@@ -48,17 +45,21 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir=None):
 
         has_valid_data = False
         plt.figure(figsize=(8, 5))
-
         keys = sorted(metric_data.keys())[:6]
+
         for idx, key in enumerate(keys):
             y = metric_data[key]
             x = metal_thicknesses_nm
+
             if all(np.isnan(y)):
                 print(f"[INFO] Skipping {metric} for {key}: all values are NaN.")
                 continue
 
             has_valid_data = True
-            label = str(key)
+
+            metal, analyte = key
+            analyte_label = name_map.get(analyte, analyte)
+            label = f"{metal} – {analyte_label}"
 
             plt.plot(x, y, 'ko', markersize=5, markerfacecolor='black')
 
@@ -67,7 +68,7 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir=None):
                 x_fine = np.linspace(min(x), max(x), 500)
                 y_smooth = spline(x_fine)
                 color = color_palette[idx % len(color_palette)]
-                plt.plot(x_fine, y_smooth, linewidth=1.5, label=label, color=color)
+                plt.plot(x_fine, y_smooth, linewidth=1.5, color=color, label=label)
             else:
                 plt.plot(x, y, 'k--', linewidth=1.0, label=label)
 
@@ -77,27 +78,24 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir=None):
             if TNR:
                 plt.xlabel(xlabel, fontsize=14, fontproperties=TNR)
                 plt.ylabel(ylabel, fontsize=14, fontproperties=TNR)
-                plt.title(f"{ylabel} vs {xlabel}", fontsize=15, fontproperties=TNR)
                 plt.xticks(fontsize=12, fontproperties=TNR)
                 plt.yticks(fontsize=12, fontproperties=TNR)
                 plt.legend(fontsize=10, loc="best", prop=TNR)
             else:
                 plt.xlabel(xlabel, fontsize=14)
                 plt.ylabel(ylabel, fontsize=14)
-                plt.title(f"{ylabel} vs {xlabel}", fontsize=15)
                 plt.xticks(fontsize=12)
                 plt.yticks(fontsize=12)
                 plt.legend(fontsize=10, loc="best")
 
+            # Remoção de título (como solicitado)
+            plt.title("")
             plt.grid(True)
             plt.tight_layout()
 
-            if save_dir:
-                base_filename = f"{metric}"
-                plt.savefig(f"{save_dir}/{base_filename}.png", dpi=300, bbox_inches='tight')
-                plt.savefig(f"{save_dir}/{base_filename}.eps", format='eps', bbox_inches='tight')
-                print(f"[INFO] Saved: {save_dir}/{base_filename}.png and .eps")
-
+            fname = os.path.join(save_dir, metric)
+            save_figure(fname)
             plt.show()
+            plt.close()
         else:
             print(f"[INFO] Skipping plot for {metric}: no valid data to display.")

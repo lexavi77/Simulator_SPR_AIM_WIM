@@ -4,9 +4,10 @@ import os
 from matplotlib.font_manager import FontProperties
 from fresnel_utils import getFresnelAIM
 from performance_metrics import calculate_theta_res, calculate_fwhm
+from plot_style import apply_plot_style
+from plot_utils import save_figure
 
-
-# Font configuration
+# Fonte
 try:
     font_path = "/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf"
     TNR = FontProperties(fname=font_path) if os.path.exists(font_path) else None
@@ -14,24 +15,22 @@ except Exception:
     TNR = None
     print("[WARNING] Times New Roman not found. Using default font.")
 
-# MATLAB-style colors
+# Paleta MATLAB-like
 color_palette = [
-    (0, 0.5, 0),        # green
-    (0, 0, 1),          # blue
-    (0.93, 0.11, 0.14), # red
-    (0, 0.75, 0.75),    # cyan
-    (0.75, 0, 0.75),    # magenta
-    (0.75, 0.75, 0),    # yellow
-    (0.25, 0.25, 0.25), # gray
-    (1, 0.5, 0),        # orange
-    (0.5, 0, 0),        # dark red
-    (0, 0.5, 0.5),      # teal
-    (0, 0, 0)           # black
+    (0, 0.5, 0), (0, 0, 1), (0.93, 0.11, 0.14), (0, 0.75, 0.75),
+    (0.75, 0, 0.75), (0.75, 0.75, 0), (0.25, 0.25, 0.25), (1, 0.5, 0),
+    (0.5, 0, 0), (0, 0.5, 0.5), (0, 0, 0)
 ]
+
+name_map = {
+    "analyte_01": "positive",
+    "analyte_02": "negative"
+}
 
 def run_reflectance_simulation(substrate, metal, analytes, materials,
                                 lambda0, theta_deg, theta_rad,
                                 d_cr, d_analyte, metal_thicknesses_nm):
+    apply_plot_style()
     results = {
         "theta_res": {},
         "fwhm": {},
@@ -43,8 +42,8 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
     os.makedirs("figures", exist_ok=True)
 
     for analyte in analytes:
-        readable_name = analyte.replace("_", " ").capitalize()
-        print(f"\nSimulating for {readable_name}...")
+        label_analyte = name_map.get(analyte, analyte)
+        print(f"\nSimulating for {label_analyte}...")
 
         plt.figure(figsize=(10, 6))
         theta_res_list = []
@@ -73,12 +72,9 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
             fwhm_list.append(fwhm)
             reflectance_list.append(Rp)
 
-            # Plot curve
             color = color_palette[i % len(color_palette)]
             plt.plot(theta_deg, Rp, linewidth=1.5, color=color,
                      label=f'{d_metal_nm} nm | θres ≈ {theta_res:.2f}°')
-
-            # Plot θres marker
             if not np.isnan(theta_res):
                 Rp_res = np.interp(theta_res, theta_deg, Rp)
                 plt.plot(theta_res, Rp_res, 'ko', markersize=5, markerfacecolor='black')
@@ -87,7 +83,6 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
         results["fwhm"][(metal, analyte)] = fwhm_list
         results["reflectance"][(metal, analyte)] = reflectance_list
 
-        # Labels only (no title)
         if TNR:
             plt.xlabel("Angle (°)", fontsize=14, fontproperties=TNR)
             plt.ylabel("Reflectance (a.u.)", fontsize=14, fontproperties=TNR)
@@ -101,22 +96,18 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
             plt.yticks(fontsize=12)
             plt.legend(fontsize=9, loc="best")
 
-        # Auto-scale x-axis around θres
         if theta_res_list:
             theta_min = min(theta_res_list)
             theta_max = max(theta_res_list)
-            padding = 1.5
-            plt.xlim(theta_min - padding, theta_max + padding)
+            plt.xlim(theta_min - 1.5, theta_max + 1.5)
 
         plt.ylim(0, 1)
         plt.grid(True)
         plt.tight_layout()
 
-        base = f"figures/reflectance_{substrate}_{metal}_{analyte}"
-        plt.savefig(f"{base}.png", dpi=300, bbox_inches='tight')
-        plt.savefig(f"{base}.eps", format='eps', bbox_inches='tight')
-        print(f"[INFO] Saved: {base}.png and .eps")
-
+        base = f"figures/reflectance_{substrate.lower()}_{metal.lower()}_{label_analyte.lower()}"
+        save_figure(base)
         plt.show()
+        plt.close()
 
     return results

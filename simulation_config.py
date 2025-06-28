@@ -11,3 +11,4 @@ metal_thicknesses_nm = np.arange(45, 56, 1)  # in nanometers
 
 # Only two analytes are used; central value is computed dynamically where needed
 analytes = ["analyte_01", "analyte_02"]
+

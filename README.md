@@ -1,89 +1,121 @@
 # Simulator_SPR_AIM_WIM
 
-A computational simulator developed in Python for the analysis of optical sensors based on the Surface Plasmon Resonance (SPR) phenomenon, using the **Angular Interrogation Method (AIM)** — where the incidence angle is varied — and the **Wavelength Interrogation Mode** — where the angle is fixed and the wavelength is swept, implemented using a **Wave Interference Method** approach, also known as the **Transfer Matrix Method (TMM)**.
+A modular and extensible Python simulator for **Surface Plasmon Resonance (SPR)** sensors, supporting both **Angular Interrogation Method (AIM)** and upcoming **Wavelength Interrogation Mode (WIM)**. Designed for scientific research, especially in biosensing applications using **Loop-Mediated Isothermal Amplification (LAMP)**.
 
-This project aims to provide a precise, modular, and reproducible platform for investigating the optical properties of multilayer structures applied to biosensors.
+The simulator enables precise modeling of multilayer structures (prism/metal/analyte), offering tools for visualization, sensitivity analysis, and performance benchmarking of SPR-based sensors.
 
-## 📌 General Description
+---
 
-The `Simulator_SPR_AIM_WIM` project integrates fundamental concepts from electrical engineering, optics, and scientific computing to simulate electromagnetic phenomena in SPR sensors. The focus lies in modeling light interaction with metallic and dielectric structures, considering material properties, layer thicknesses, and variations in the refractive index of the sensing medium.
+## 📌 Overview
 
-This simulator serves as a support tool for scientific research in the context of biomolecular detection, especially in hybrid systems combining **Loop-Mediated Isothermal Amplification (LAMP)** with SPR.
+The project integrates principles of optics, electromagnetism, and scientific computing to model the interaction between light and nanostructured surfaces, providing:
 
-> 🔧 **Note:** Although the wavelength interrogation mode **(WIM)** — which involves sweeping the wavelength while keeping the incidence angle fixed — has already been simulated separately, it has not yet been integrated into the main simulator. Additionally, dispersion effects have not yet been incorporated into these calculations.
+- Angular reflectance simulations using Fresnel equations (AIM)
+- Exportable results and figure of merit analysis (θ_res, FWHM, χ, Q)
+- Automated plotting with a MATLAB-like aesthetic (Times New Roman, color palette)
+- Modular architecture for easy experimentation with different materials
 
-## 🎓 Academic and Scientific Applications
+> ⚠️ **Note:** The **Wavelength Interrogation Mode (WIM)** is under development. Dispersion models for optical materials are partially implemented but not yet integrated into WIM.
 
-- Simulation of SPR reflectance curves for various material configurations
-- Calculation of figures of merit: angular sensitivity, FWHM, figure of merit (FoM)
-- Performance evaluation of SPR-based optical sensors
-- Visualization of the evanescent electric field distribution
-- Comparison between AIM and WIM methods
-- Validation of numerical models using commercial software (e.g., COMSOL)
+---
 
-## 🧱 Project Structure 
+## 🎯 Key Features
+
+✅ Angular interrogation with Fresnel-based reflectance  
+✅ Multiple substrates (PMMA, PC, TOPAS) and metals (Au, Ag, Cu)  
+✅ Analyte variation: both positive and negative groups (RIU shift)  
+✅ Performance metrics: Sensitivity (empirical & theoretical), FWHM, χ, Q  
+✅ Mode-specific outputs:  
+  - `run_mode_1`: θres & metrics per configuration  
+  - `run_mode_2`: 22 reflectance curves per metal  
+  - `run_mode_3`: sensitive structure (fixed metal thickness) scan  
+✅ CSV exports for θres and merit figures  
+✅ Publication-ready plots (.png and .eps)
+
+---
+
+## 🧪 Academic Applications
+
+- Design and optimization of SPR biosensors
+- Integration studies of SPR and LAMP for point-of-care diagnostics
+- Theoretical and empirical analysis of sensor performance
+- Comparison between different metals and substrates
+- Validation of numerical results via tools like COMSOL
+
+---
+
+## 📁 Project Structure
+
+```
 Simulator_SPR_AIM_WIM/
+├── main.py                         # Execution entry point
+├── fresnel_utils.py               # Fresnel reflectance core
+├── reflectance_simulator.py       # AIM simulation logic
+├── calculate_figures.py           # Sensitivity, chi, Q computation
+├── performance_metrics.py         # Theta_res, FWHM, helper formulas
+├── optical_data.py                # Refractive index dictionary
+├── simulation_config.py           # Global parameters (λ, θ, d, analytes)
+├── plot_style.py                  # Style definitions (fonts, grids)
+├── plot_utils.py                  # Centralized figure export (.eps/.png)
+├── plot_reflectance_full.py       # 22 curves plotting (mode 2)
+├── plot_sensitive_structure.py    # Fixed-thickness analyte variation (mode 3)
+├── merit_figures_plot.py          # Plotting metrics vs metal thickness
+├── save_results.py                # CSV export of computed values
+├── user_input.py                  # CLI input for substrate/metal
+└── README.md
 ```
-├── main.py
-├── fresnel_utils.py
-├── reflectance_simulator.py
-├── calculate_figures.py
-├── performance_metrics.py
-├── optical_data.py
-├── simulation_config.py
-├── user_input.py
-├── merit_figures_plot.py
-├── .gitignore
-├── README.md
-└── __pycache__/
-```
-## 🧰 Software Requirements
+
+---
+
+## 💻 Requirements
 
 - Python 3.10+
-- Libraries:
-  - NumPy
-  - Matplotlib
-  - SciPy
+- Dependencies:
+  ```bash
+  pip install numpy matplotlib scipy pandas
+  ```
 
-To install:
+---
 
-```bash
-pip install numpy matplotlib scipy
-```
-
-## ⚙️ Execution
-
-Run the main script with:
+## ⚙️ How to Run
 
 ```bash
 python3 main.py
 ```
 
-The user must choose:
+You will be prompted to select:
 
-1. Simulation method (AIM or, in development, WIM)
-2. Optical substrate (PMMA, PC, TOPAS)
-3. Metal layer (Au, Ag, Cu)
-4. Analyte (fixed or variable refractive index)
+1. Simulation mode (1, 2, or 3)
+2. Substrate (PMMA, PC, TOPAS)
+3. Metal (Ag, Au, Cu)
 
-Results include angular reflectance curves, sensitivity, and figure of merit.
+Results will be saved in structured folders (`/outputs/...`) including:
+- Angular reflectance curves
+- Figures of merit (θres, FWHM, χ, Q)
+- CSV export for reproducibility
 
-## 📊 Output Results
+---
 
-- SPR reflectance curves
-- Spectral analysis by varying incidence angle
-- Sensitivity vs. analyte refractive index
-- Material and substrate comparison
-- Evanescent field distribution (in development)
-- Exportable data for validation (e.g., COMSOL)
+## 🔭 Next Steps
 
-## 👨‍💼 Technical Lead
+- 🔄 Integration of Wavelength Interrogation Mode (WIM)
+- 🌐 Web-based frontend using WIM interface (HTML/JS)
+- 📈 Real-time plot updates via ESP32 web server (for embedded use)
+- 🧠 Material dispersion support (spectral refractive indices)
+
+---
+
+## 👨‍🔬 Author
 
 **Alex Armênio Xavier Ramos**  
-Electrical Engineering Student – Federal University of Campina Grande (UFCG)  
-PIBIC Researcher – Project: *Hybrid LAMP-SPR sensors for point-of-care diagnostics*  
-Contact: lexavi779910@gmail.com
+Undergraduate Researcher (PIBIC)  
+Electrical Engineering – Federal University of Campina Grande (UFCG)  
+Email: [lexavi779910@gmail.com](mailto:lexavi779910@gmail.com)
+
+Project: *Hybrid LAMP-SPR sensors for point-of-care diagnostics*
+
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
+Distributed under the MIT License. See `LICENSE` for details.

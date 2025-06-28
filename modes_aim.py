@@ -5,6 +5,7 @@ from calculate_figures import calculate_all_figures_of_merit
 from merit_figures_plot import plot_figures_of_merit
 from save_results import save_results_to_csv
 from plot_reflectance_full import plot_reflectance_22_curves
+from plot_style import apply_plot_style
 from plot_sensitive_structure import plot_angular_response_for_sensitive_structure_and_export_csv
 from optical_data import materials
 from simulation_config import (
@@ -13,9 +14,11 @@ from simulation_config import (
 )
 
 def run_mode_1():
+    apply_plot_style()  # Aplica o estilo MATLAB-like
+
     substrate, metal = select_materials()
 
-    # Simulates for analyte_01 and analyte_02
+    # Simula para analyte_01 e analyte_02
     results = run_reflectance_simulation(
         substrate, metal, analytes,
         materials, lambda0, theta_deg, theta_rad,
@@ -25,12 +28,11 @@ def run_mode_1():
     results["theta_deg"] = theta_deg
     results["substrate"] = substrate
 
-    # Calculates figures of merit comparing analyte_01 and analyte_02
+    # Calcula figuras de mérito
     calculate_all_figures_of_merit(results, materials, metal)
 
-    # Plot and save figures of merit
+    # Plota e salva gráficos das figuras de mérito
     plot_figures_of_merit(results, metal_thicknesses_nm)
-
 
 def run_mode_2():
     print("\n[MODE 2] Plotting 22 reflectance curves per metal...")
