@@ -6,7 +6,7 @@ from fresnel_utils import getFresnelAIM
 from performance_metrics import calculate_theta_res_smooth
 from matplotlib.font_manager import FontProperties
 from plot_style import apply_plot_style
-from plot_utils import save_figure
+from plot_utils import save_figure, get_matlab_colors  # ⬅️ nova importação
 
 # Try to load Times New Roman
 try:
@@ -15,6 +15,7 @@ try:
 except Exception:
     print("[WARNING] Times New Roman not found. Using default font.")
     TNR = None
+
 
 def plot_angular_response_for_sensitive_structure_and_export_csv(
     materials, lambda0, theta_deg, theta_rad,
@@ -41,7 +42,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
 
     for metal in metals:
         plt.figure(figsize=(10, 6))
-        color_map = ['blue', 'orange', 'green', 'red', 'purple', 'brown']
+        color_map = get_matlab_colors(6)  # ⬅️ MATLAB-style cores
         all_thetas = {"positive": [], "negative": []}
         legend_handles = []
 
@@ -72,9 +73,14 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
 
             label = f"n = {n_analyte:.4f}"
             line, = plt.plot(theta_deg, Rp, color=color_map[i], linewidth=1.5, label=label)
-            plt.plot(theta_deg, Rp, 'ko', markersize=5, markerfacecolor='black', alpha=0.6)
+
+            # Marcador apenas em θ_res
+            idx_res = np.argmin(np.abs(np.array(theta_deg) - theta_res))
+            plt.plot(theta_deg[idx_res], Rp[idx_res], 'ko', markersize=6, markerfacecolor='black')
+
             legend_handles.append(line)
 
+            # Zoom local
             x_min = max(theta_res - 2, theta_deg[0])
             x_max = min(theta_res + 2, theta_deg[-1])
             y_min = max(0, np.min(Rp) - 0.05)
@@ -83,6 +89,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
             plt.xlim(x_min, x_max)
             plt.ylim(y_min, y_max)
 
+        # Estatísticas por grupo
         for group in ["positive", "negative"]:
             thetas = all_thetas[group]
             mean_theta = np.mean(thetas)
@@ -109,6 +116,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
                 }
             ])
 
+        # Eixos e legenda
         if TNR:
             plt.xlabel("Angle (°)", fontsize=14, fontproperties=TNR)
             plt.ylabel("Reflectance (a.u.)", fontsize=14, fontproperties=TNR)
@@ -123,7 +131,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
             plt.legend(handles=legend_handles, loc="best", fontsize=9)
 
         plt.grid(True)
-        plt.title("")  # Garante ausência de título
+        plt.title("")
         plt.tight_layout()
 
         fname = os.path.join(save_dir, f"spr_reflectance_{substrate.lower()}_{metal.lower()}_55nm")
@@ -131,6 +139,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
         plt.show()
         plt.close()
 
+    # Exporta CSV com dados agregados
     df_all = pd.DataFrame(all_data)
     csv_path = os.path.join(save_dir, "theta_res_stats_all_metals_55nm.csv")
     df_all.to_csv(csv_path, index=False)

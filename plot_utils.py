@@ -25,3 +25,28 @@ def save_figure(filename_base: str, dpi_eps: int = 600, dpi_png: int = 300):
     plt.savefig(eps_path, format="eps", bbox_inches="tight", dpi=dpi_eps)
     plt.savefig(png_path, format="png", dpi=dpi_png)
     print(f"[INFO] Saved: {eps_path} and {png_path}")
+
+
+def get_matlab_colors(n):
+    """
+    Returns a list of n distinct colors in the MATLAB/Tableau style.
+    
+    Parameters:
+        n (int): Number of colors requested.
+
+    Returns:
+        List of hex color codes.
+    """
+    base_colors = [
+        "#1f77b4",  # Blue
+        "#ff7f0e",  # Orange
+        "#2ca02c",  # Green
+        "#d62728",  # Red
+        "#9467bd",  # Purple
+        "#8c564b",  # Brown
+        "#e377c2",  # Pink
+        "#7f7f7f",  # Gray
+        "#bcbd22",  # Olive
+        "#17becf"   # Cyan
+    ]
+    return [base_colors[i % len(base_colors)] for i in range(n)]
