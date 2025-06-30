@@ -1,31 +1,35 @@
 import pandas as pd
 
-def save_results_to_csv(results, metal, analyte, filename="results_spr.csv"):
+def save_results_to_csv(results, metal_thicknesses_nm, analytes_dict, filename="results_spr.csv"):
     """
-    Saves the empirical and theoretical figures of merit for a given metal-analyte pair to a CSV file.
+    Saves all empirical and theoretical figures of merit for each metal-analyte pair to a CSV file.
     """
-    key = (metal, analyte)
+    all_rows = []
 
-    thicknesses = results.get(
-        "metal_thicknesses_nm",
-        list(range(45, 45 + len(results["theta_res"].get(key, []))))
-    )
+    for metal in ["Ag", "Au", "Cu"]:
+        for analyte_key, analyte_value in analytes_dict.items():
+            key = (metal, analyte_key)
 
-    df = pd.DataFrame({
-        "Metal_Thickness_nm": thicknesses,
-        "Theta_res_deg": results["theta_res"].get(key),
-        "FWHM_deg": results["fwhm"].get(key),
+            row_count = len(results["theta_res"].get(key, []))
+            thicknesses = metal_thicknesses_nm[:row_count]
 
-        # Empirical metrics (use only once per metal)
-        "Sensitivity_Empirical_deg_per_RIU": results.get("sensitivity_empirical", {}).get(metal),
-        "Chi_Empirical": results.get("chi_empirical", {}).get(metal),
-        "Q_Empirical": results.get("q_empirical", {}).get(metal),
+            # Monta as linhas para cada espessura
+            for i in range(row_count):
+                row = {
+                    "Metal": metal,
+                    "Analyte": analyte_key,
+                    "Metal_Thickness_nm": thicknesses[i],
+                    "Theta_res_deg": results["theta_res"].get(key, [None]*row_count)[i],
+                    "FWHM_deg": results["fwhm"].get(key, [None]*row_count)[i],
+                    "Sensitivity_Empirical_deg_per_RIU": results.get("sensitivity_empirical", {}).get(metal, None),
+                    "Chi_Empirical": results.get("chi_empirical", {}).get(key, [None]*row_count)[i],
+                    "Q_Empirical": results.get("q_empirical", {}).get(key, [None]*row_count)[i],
+                    "Sensitivity_Theoretical_deg_per_RIU": results.get("sensitivity_theoretical", {}).get(key, [None]*row_count)[i],
+                    "Chi_Theoretical": results.get("chi_theoretical", {}).get(key, [None]*row_count)[i],
+                    "Q_Theoretical": results.get("q_theoretical", {}).get(key, [None]*row_count)[i],
+                }
+                all_rows.append(row)
 
-        # Theoretical metrics
-        "Sensitivity_Theoretical_deg_per_RIU": results.get("sensitivity_theoretical", {}).get(metal),
-        "Chi_Theoretical": results.get("chi_theoretical", {}).get(metal),
-        "Q_Theoretical": results.get("q_theoretical", {}).get(metal),
-    })
-
+    df = pd.DataFrame(all_rows)
     df.to_csv(filename, index=False)
     print(f"[INFO] Results saved to: {filename}")

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 from matplotlib.font_manager import FontProperties
 from fresnel_utils import getFresnelAIM
-from performance_metrics import calculate_theta_res, calculate_fwhm
+from performance_metrics import calculate_theta_res_smooth, calculate_fwhm
 from plot_style import apply_plot_style
 from plot_utils import save_figure
 
@@ -27,9 +27,15 @@ name_map = {
     "analyte_02": "negative"
 }
 
+# Auxiliar para aplicar janela angular
+def restrict_range(theta_deg, Rp, window=(40, 80)):
+    mask = (theta_deg >= window[0]) & (theta_deg <= window[1])
+    return theta_deg[mask], Rp[mask]
+
 def run_reflectance_simulation(substrate, metal, analytes, materials,
                                 lambda0, theta_deg, theta_rad,
-                                d_cr, d_analyte, metal_thicknesses_nm):
+                                d_cr, d_analyte, metal_thicknesses_nm,
+                                theta_window=(40, 80)):  # Janela padrão
     apply_plot_style()
     results = {
         "theta_res": {},
@@ -65,7 +71,9 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
                 for angle in theta_rad
             ])
 
-            theta_res = calculate_theta_res(Rp, theta_deg)
+            # Janela angular + interpolação suave
+            theta_deg_windowed, Rp_windowed = restrict_range(theta_deg, Rp, theta_window)
+            theta_res = calculate_theta_res_smooth(theta_deg_windowed, Rp_windowed)
             fwhm = calculate_fwhm(Rp, theta_deg)
 
             theta_res_list.append(theta_res)

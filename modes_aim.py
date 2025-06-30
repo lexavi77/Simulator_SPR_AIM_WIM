@@ -14,25 +14,67 @@ from simulation_config import (
 )
 
 def run_mode_1():
-    apply_plot_style()  # Aplica o estilo MATLAB-like
+    """
+    Mode 1: User selects a substrate; simulator compares Ag, Au, Cu
+    using analyte_01 (positive) and analyte_02 (negative) and calculates figures of merit.
+    """
+    from simulation_config import analytes
 
-    substrate, metal = select_materials()
+    apply_plot_style()
 
-    # Simula para analyte_01 e analyte_02
-    results = run_reflectance_simulation(
-        substrate, metal, analytes,
-        materials, lambda0, theta_deg, theta_rad,
-        d_cr, d_analyte, metal_thicknesses_nm
-    )
+    available_substrates = ["PMMA", "PC", "TOPAS"]
+    print("[MODE 1] Compare Ag, Au, Cu for a selected substrate using analyte_01 and analyte_02")
+    print("Select substrate:")
+    for i, s in enumerate(available_substrates, 1):
+        print(f"{i} - {s}")
 
-    results["theta_deg"] = theta_deg
-    results["substrate"] = substrate
+    try:
+        index = int(input("Option: ").strip())
+        substrate = available_substrates[index - 1]
+    except (ValueError, IndexError):
+        print("[ERROR] Invalid option.")
+        return
 
-    # Calcula figuras de mérito
-    calculate_all_figures_of_merit(results, materials, metal)
+    # Use both analytes for empirical sensitivity
+    analyte = {
+        "analyte_01": analytes["analyte_01"],
+        "analyte_02": analytes["analyte_02"]
+    }
 
-    # Plota e salva gráficos das figuras de mérito
+    results = {
+        "theta_deg": theta_deg,
+        "substrate": substrate,
+        "theta_res": {},
+        "fwhm": {},
+        "reflectance": {},
+    }
+
+    for metal in ["Ag", "Au", "Cu"]:
+        res = run_reflectance_simulation(
+            substrate, metal, analyte,
+            materials, lambda0, theta_deg, theta_rad,
+            d_cr, d_analyte, metal_thicknesses_nm
+        )
+
+        results["reflectance"].update(res["reflectance"])
+        results["theta_res"].update(res["theta_res"])
+        results["fwhm"].update(res["fwhm"])
+
+        calculate_all_figures_of_merit(res, materials, metal)
+
+        for key in [
+            "sensitivity_empirical", "chi_empirical", "q_empirical",
+            "sensitivity_theoretical", "chi_theoretical", "q_theoretical"
+        ]:
+            if key in res:
+                if key not in results:
+                    results[key] = {}
+                results[key].update(res[key])
+
     plot_figures_of_merit(results, metal_thicknesses_nm)
+    save_results_to_csv(results, metal_thicknesses_nm)
+
+
 
 def run_mode_2():
     print("\n[MODE 2] Plotting 22 reflectance curves per metal...")
@@ -77,7 +119,8 @@ def run_mode_2():
                 results[key].update(res[key])
 
     # Plot and save the 22 reflectance curves per metal
-    plot_reflectance_22_curves(results, metal_thicknesses_nm)
+    plot_reflectance_22_curves(results, metal_thicknesses_nm, figures=results)
+
 
 
 def run_mode_3():

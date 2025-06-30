@@ -7,8 +7,12 @@ Ag,positive,center,1.3492,63.891561554557086
 Ag,positive,high,1.3502,63.98403490458632
 Ag,positive,mean,-,63.891666358118606
 Ag,positive,std,-,0.07537585293140203
+Ag,positive,sensitivity_empirical,-,92.31614468697508
+Ag,positive,sensitivity_theoretical,-,42.47838579822168
 Ag,negative,mean,-,63.79030500021843
 Ag,negative,std,-,0.07509703599221226
+Ag,negative,sensitivity_empirical,-,91.97466628098941
+Ag,negative,sensitivity_theoretical,-,42.51306156915119
 Au,negative,low,1.3471,63.73482257807828
 Au,negative,center,1.3481,63.826684513857145
 Au,negative,high,1.3491,63.91885075535349
@@ -17,8 +21,12 @@ Au,positive,center,1.3492,63.928085531203564
 Au,positive,high,1.3502,64.02059557786703
 Au,positive,mean,-,63.92818979804406
 Au,positive,std,-,0.07540647256727727
+Au,positive,sensitivity_empirical,-,92.35364640273099
+Au,positive,sensitivity_theoretical,-,42.66793673086584
 Au,negative,mean,-,63.82678594909631
 Au,negative,std,-,0.07512922300782729
+Au,negative,sensitivity_empirical,-,92.01408863761476
+Au,negative,sensitivity_theoretical,-,42.70300727365962
 Cu,negative,low,1.3471,63.64012500349637
 Cu,negative,center,1.3481,63.73138855645416
 Cu,negative,high,1.3491,63.82295251941549
@@ -27,5 +35,9 @@ Cu,positive,center,1.3492,63.83212568408145
 Cu,positive,high,1.3502,63.92402476302427
 Cu,positive,mean,-,63.83222726121426
 Cu,positive,std,-,0.0749109121087251
+Cu,positive,sensitivity_empirical,-,91.74671324362593
+Cu,positive,sensitivity_theoretical,-,43.03946699208849
 Cu,negative,mean,-,63.731488693122
 Cu,negative,std,-,0.07463905440988541
+Cu,negative,sensitivity_empirical,-,91.41375795956759
+Cu,negative,sensitivity_theoretical,-,43.07532788793445

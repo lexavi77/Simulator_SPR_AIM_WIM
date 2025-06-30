@@ -5,14 +5,18 @@ import os
 from matplotlib import font_manager
 
 def apply_plot_style():
-    # Tenta localizar Times New Roman
+    # Caminho da Times New Roman
     font_path = "/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf"
+    fallback_font = "DejaVu Serif"
+
     if os.path.exists(font_path):
         font_entry = font_manager.FontProperties(fname=font_path)
-        mpl.rcParams["font.family"] = font_entry.get_name()
+        tnr_name = font_entry.get_name()
+        mpl.rcParams["font.family"] = [tnr_name, fallback_font]
+        print(f"[INFO] Using font: {tnr_name} with fallback: {fallback_font}")
     else:
-        print("[WARNING] Times New Roman not found. Using default serif font.")
-        mpl.rcParams["font.family"] = "serif"
+        mpl.rcParams["font.family"] = [fallback_font]
+        print(f"[WARNING] Times New Roman not found. Using fallback: {fallback_font}")
 
     mpl.rcParams.update({
         "font.size": 12,

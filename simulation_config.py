@@ -1,14 +1,30 @@
 import numpy as np
 
-lambda0 = 850e-9  # wavelength
+# Constants and sweep parameters
+lambda0 = 850e-9  # wavelength in meters
 theta_deg = np.linspace(40, 80, 4001)
 theta_rad = np.radians(theta_deg)
 
-d_cr = 2e-9  # chromium adhesion layer thickness (if used)
-d_analyte = 1000e-9  # analyte layer thickness
+# Fixed layer thicknesses
+d_cr = 2e-9        # chromium adhesion layer (optional, in meters)
+d_analyte = 1000e-9  # analyte layer thickness (in meters)
 
-metal_thicknesses_nm = np.arange(45, 56, 1)  # in nanometers
+# Metal thickness range in nanometers
+metal_thicknesses_nm = np.arange(45, 56, 1)  # 45 to 55 nm
 
-# Only two analytes are used; central value is computed dynamically where needed
-analytes = ["analyte_01", "analyte_02"]
+analytes = {
+    "analyte_01": 1.3492,
+    "analyte_02": 1.3481
+}
 
+# Global config dictionary (used in mode_compare_metals)
+config = {
+    "lambda0": lambda0,
+    "theta_deg": theta_deg,
+    "theta_rad": theta_rad,
+    "d_cr": d_cr,
+    "d_analyte": d_analyte,
+    "metal_thicknesses_nm": metal_thicknesses_nm,
+    "analytes": analytes,
+    "metal": "Au"  # default metal
+}

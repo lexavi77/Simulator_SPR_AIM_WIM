@@ -29,14 +29,26 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figur
     apply_plot_style()
     os.makedirs(save_dir, exist_ok=True)
 
-    metrics = ["theta_res", "fwhm", "chi_empirical", "q_empirical"]
+    metrics = [
+        "theta_res", "fwhm",
+        "sensitivity_empirical", "sensitivity_theoretical",
+        "chi_empirical", "chi_theoretical",
+        "q_empirical", "q_theoretical"
+    ]
 
     titles = {
         "theta_res": (r"Resonance Angle (°)", "Metal Thickness (nm)"),
         "fwhm": (r"FWHM (°)", "Metal Thickness (nm)"),
-        "chi_empirical": (r"$\chi\ (\mathrm{RIU}^{-1})$", "Metal Thickness (nm)"),
-        "q_empirical": (r"$Q\ (\mathrm{a.u.})$", "Metal Thickness (nm)")
+        "sensitivity_empirical": (r"Sensitivity (°/RIU)", "Metal Thickness (nm)"),
+        "sensitivity_theoretical": (r"Sensitivity (°/RIU)", "Metal Thickness (nm)"),
+        "chi_empirical": (r"$\chi$ (RIU$^{-1})$", "Metal Thickness (nm)"),
+        "chi_theoretical": (r"$\chi$ (RIU$^{-1})$", "Metal Thickness (nm)"),
+        "q_empirical": (r"$Q$ (a.u.)", "Metal Thickness (nm)"),
+        "q_theoretical": (r"$Q$ (a.u.)", "Metal Thickness (nm)")
     }
+
+
+
 
     for metric in metrics:
         metric_data = results.get(metric, {})
@@ -46,7 +58,9 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figur
 
         has_valid_data = False
         plt.figure(figsize=(8, 5))
-        keys = sorted(metric_data.keys())[:6]
+
+        # Suporte a diferentes chaves (com ou sem analyte)
+        keys = sorted(metric_data.keys())
 
         for idx, key in enumerate(keys):
             y = metric_data[key]
@@ -58,22 +72,24 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figur
 
             has_valid_data = True
 
-            # Extract metal and analyte
-            metal_name, analyte_key = key
-            analyte_label = name_map.get(analyte_key, analyte_key)
-            label_key = f"{metal_name} – {analyte_label}"
+            # Rótulo da curva
+            if isinstance(key, tuple) and len(key) == 2:
+                metal_name, analyte_key = key
+                analyte_label = name_map.get(analyte_key, analyte_key)
+                label = f"{metal_name} – {analyte_label}"
+            else:
+                label = str(key)
 
             color = color_palette[idx % len(color_palette)]
-
             plt.plot(x, y, 'ko', markersize=5, markerfacecolor='black')
 
             if len(x) >= 4 and not np.any(np.isnan(y)):
                 spline = CubicSpline(x, y)
                 x_fine = np.linspace(min(x), max(x), 500)
                 y_smooth = spline(x_fine)
-                plt.plot(x_fine, y_smooth, linewidth=1.5, label=label_key, color=color)
+                plt.plot(x_fine, y_smooth, linewidth=1.5, label=label, color=color)
             else:
-                plt.plot(x, y, 'k--', linewidth=1.0, label=label_key)
+                plt.plot(x, y, 'k--', linewidth=1.0, label=label)
 
         if has_valid_data:
             ylabel, xlabel = titles[metric]
@@ -91,7 +107,7 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figur
                 plt.yticks(fontsize=12)
                 plt.legend(fontsize=10, loc="best")
 
-            plt.title("")  # Remove explicit title
+            plt.title("")  # sem título no topo
             plt.grid(True)
             plt.tight_layout()
 

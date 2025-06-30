@@ -5,8 +5,8 @@ def main():
     print("1 - Analyze a specific material")
     print("2 - Plot 22 reflectance curves per metal (final report requirement)")
     print("3 - Plot sensitive structure (TOPAS + d=55nm) for 3 metals (6 analytes)")
-    
-    mode = input("Mode (1, 2 or 3): ").strip()
+
+    mode = input("Mode (1, 2, 3 ): ").strip()
 
     if mode == "1":
         run_mode_1()

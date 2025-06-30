@@ -19,7 +19,7 @@ GROUP_LABELS = {"analyte_01": "positive", "analyte_02": "negative"}
 GROUP_COLORS = {"analyte_01": "#1f77b4", "analyte_02": "#d62728"}
 GROUP_LINES = {"analyte_01": "-", "analyte_02": "--"}
 
-def plot_reflectance_22_curves(results, metal_thicknesses_nm, save_dir="outputs/reflectance_curves"):
+def plot_reflectance_22_curves(results, metal_thicknesses_nm, figures, save_dir="outputs/reflectance_curves"):
     apply_plot_style()
     os.makedirs(save_dir, exist_ok=True)
 
@@ -38,12 +38,10 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm, save_dir="outputs/
                 continue
 
             for i, Rp in enumerate(Rp_list):
-                # Primeira curva de cada grupo entra na legenda
                 label = GROUP_LABELS[analyte] if i == 0 else None
                 color = GROUP_COLORS[analyte]
                 linestyle = GROUP_LINES[analyte]
 
-                # Curva
                 plt.plot(theta_deg, Rp,
                          color=color,
                          linestyle=linestyle,
@@ -51,14 +49,12 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm, save_dir="outputs/
                          alpha=0.9,
                          label=label)
 
-                # Ponto θ_res (marcador preto)
                 if len(theta_res_list) > i:
                     theta_res = theta_res_list[i]
                     idx = np.argmin(np.abs(np.array(theta_deg) - theta_res))
                     plt.plot(theta_deg[idx], Rp[idx],
                              'ko', markersize=5, markerfacecolor='black')
 
-        # Ajustes de eixo
         theta_combined = results["theta_res"].get((metal, "analyte_01"), []) + \
                          results["theta_res"].get((metal, "analyte_02"), [])
         if theta_combined:
@@ -66,7 +62,17 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm, save_dir="outputs/
 
         plt.ylim(0, 1)
 
-        # Estilo dos eixos e legenda
+        # Inserir sensibilidades exatas no gráfico (calculadas com base em analyte_01)
+        try:
+            s_num = figures["sensitivity_empirical"][0]
+            s_theo = figures["sensitivity_theoretical"][0]
+            text = f"S_num = {s_num:.6f} °/RIU\nS_theo = {s_theo:.6f} °/RIU"
+            plt.text(0.02, 0.02, text, transform=plt.gca().transAxes, fontsize=10,
+                     verticalalignment='bottom', horizontalalignment='left',
+                     bbox=dict(facecolor='white', alpha=0.6, edgecolor='gray'))
+        except Exception as e:
+            print(f"[WARNING] Could not insert sensitivity text: {e}")
+
         if TNR:
             plt.xlabel("Angle (°)", fontsize=14, fontproperties=TNR)
             plt.ylabel("Reflectance (a.u.)", fontsize=14, fontproperties=TNR)

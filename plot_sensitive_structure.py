@@ -6,9 +6,9 @@ from fresnel_utils import getFresnelAIM
 from performance_metrics import calculate_theta_res_smooth
 from matplotlib.font_manager import FontProperties
 from plot_style import apply_plot_style
-from plot_utils import save_figure, get_matlab_colors  # ⬅️ nova importação
+from plot_utils import save_figure, get_matlab_colors
 
-# Try to load Times New Roman
+# Load Times New Roman if available
 try:
     font_path = "/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf"
     TNR = FontProperties(fname=font_path) if os.path.exists(font_path) else None
@@ -17,10 +17,30 @@ except Exception:
     TNR = None
 
 
+def calculate_theoretical_sensitivity_precise(n_metal, n_analyte, n_substrate):
+    """
+    Sensitivity (°/RIU) via Thirstrup Eq. (3), no approximations.
+    """
+    eps = n_metal ** 2
+    eps_mr = np.real(eps)
+    n_eff = np.real(n_analyte)
+    n2 = np.real(n_substrate)
+
+    numerator = eps_mr ** 2
+    denominator = abs(eps_mr + n_eff ** 2)
+    root_term = eps_mr * n2**2 * (eps_mr + n_eff**2) - eps_mr**2 * n_eff**2
+
+    if denominator == 0 or root_term <= 0:
+        return np.nan
+
+    sensitivity_rad = numerator / (denominator * np.sqrt(root_term))
+    return np.degrees(sensitivity_rad)
+
+
 def plot_angular_response_for_sensitive_structure_and_export_csv(
     materials, lambda0, theta_deg, theta_rad,
     d_cr, d_analyte, substrate, metals,
-    save_dir="output_sensitive_structure"
+    save_dir="outputs/sensitive_structure"
 ):
     apply_plot_style()
     os.makedirs(save_dir, exist_ok=True)
@@ -42,7 +62,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
 
     for metal in metals:
         plt.figure(figsize=(10, 6))
-        color_map = get_matlab_colors(6)  # ⬅️ MATLAB-style cores
+        color_map = get_matlab_colors(6)
         all_thetas = {"positive": [], "negative": []}
         legend_handles = []
 
@@ -53,7 +73,7 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
                 materials[metal],
                 n_analyte + 0j
             ])
-            d = np.array([10e-9, d_metal])
+            d = np.array([d_cr, d_metal])
 
             Rp = np.array([
                 getFresnelAIM(n, d, theta, lambda0)[2]
@@ -74,49 +94,45 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
             label = f"n = {n_analyte:.4f}"
             line, = plt.plot(theta_deg, Rp, color=color_map[i], linewidth=1.5, label=label)
 
-            # Marcador apenas em θ_res
             idx_res = np.argmin(np.abs(np.array(theta_deg) - theta_res))
             plt.plot(theta_deg[idx_res], Rp[idx_res], 'ko', markersize=6, markerfacecolor='black')
 
             legend_handles.append(line)
 
-            # Zoom local
-            x_min = max(theta_res - 2, theta_deg[0])
-            x_max = min(theta_res + 2, theta_deg[-1])
-            y_min = max(0, np.min(Rp) - 0.05)
-            y_max = min(1, np.max(Rp) + 0.05)
-
-            plt.xlim(x_min, x_max)
-            plt.ylim(y_min, y_max)
-
-        # Estatísticas por grupo
+        # Métricas para cada grupo (positivo/negativo)
         for group in ["positive", "negative"]:
             thetas = all_thetas[group]
             mean_theta = np.mean(thetas)
             std_theta = np.std(thetas)
+            theta_low = thetas[0]
+            theta_high = thetas[2]
+
+            n_base = n_pos_base if group == "positive" else n_neg_base
+            n_low = n_base - 0.001
+            n_high = n_base + 0.001
+
+            sensitivity_empirical = (theta_high - theta_low) / (n_high - n_low)
+
+            sensitivity_theoretical = calculate_theoretical_sensitivity_precise(
+                n_metal=materials[metal],
+                n_analyte=n_base + 0j,
+                n_substrate=materials[substrate]
+            )
 
             print(f"{metal} - {group.upper()} group:")
             print(f"  Mean θ_res: {mean_theta:.4f}°")
-            print(f"  Std  θ_res: {std_theta:.4f}°\n")
+            print(f"  Std  θ_res: {std_theta:.4f}°")
+            print(f"  Sensitivity (empirical):  {sensitivity_empirical:.4f} °/RIU")
+            print(f"  Sensitivity (theoretical): {sensitivity_theoretical:.4f} °/RIU\n")
 
             all_data.extend([
-                {
-                    "Metal": metal,
-                    "Group": group,
-                    "n_type": "mean",
-                    "n_analyte (RIU)": "-",
-                    "Theta_res (deg)": mean_theta
-                },
-                {
-                    "Metal": metal,
-                    "Group": group,
-                    "n_type": "std",
-                    "n_analyte (RIU)": "-",
-                    "Theta_res (deg)": std_theta
-                }
+                {"Metal": metal, "Group": group, "n_type": "mean", "n_analyte (RIU)": "-", "Theta_res (deg)": mean_theta},
+                {"Metal": metal, "Group": group, "n_type": "std", "n_analyte (RIU)": "-", "Theta_res (deg)": std_theta},
+                {"Metal": metal, "Group": group, "n_type": "sensitivity_empirical", "n_analyte (RIU)": "-", "Theta_res (deg)": sensitivity_empirical},
+                {"Metal": metal, "Group": group, "n_type": "sensitivity_theoretical", "n_analyte (RIU)": "-", "Theta_res (deg)": sensitivity_theoretical}
             ])
 
-        # Eixos e legenda
+        # Finalização dos gráficos
         if TNR:
             plt.xlabel("Angle (°)", fontsize=14, fontproperties=TNR)
             plt.ylabel("Reflectance (a.u.)", fontsize=14, fontproperties=TNR)
@@ -131,7 +147,6 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
             plt.legend(handles=legend_handles, loc="best", fontsize=9)
 
         plt.grid(True)
-        plt.title("")
         plt.tight_layout()
 
         fname = os.path.join(save_dir, f"spr_reflectance_{substrate.lower()}_{metal.lower()}_55nm")
@@ -139,7 +154,6 @@ def plot_angular_response_for_sensitive_structure_and_export_csv(
         plt.show()
         plt.close()
 
-    # Exporta CSV com dados agregados
     df_all = pd.DataFrame(all_data)
     csv_path = os.path.join(save_dir, "theta_res_stats_all_metals_55nm.csv")
     df_all.to_csv(csv_path, index=False)
