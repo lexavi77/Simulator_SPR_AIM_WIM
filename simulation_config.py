@@ -7,7 +7,7 @@ theta_rad = np.radians(theta_deg)
 
 # Fixed layer thicknesses
 d_cr = 2e-9        # chromium adhesion layer (optional, in meters)
-d_analyte = 1000e-9  # analyte layer thickness (in meters)
+d_analyte = 445e-9  # analyte layer thickness (in meters)
 
 # Metal thickness range in nanometers
 metal_thicknesses_nm = np.arange(45, 56, 1)  # 45 to 55 nm
