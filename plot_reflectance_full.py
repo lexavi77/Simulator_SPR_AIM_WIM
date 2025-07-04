@@ -14,8 +14,8 @@ except Exception:
     TNR = None
     print("[WARNING] Times New Roman not found. Using default font.")
 
-# Estilo por grupo
-GROUP_LABELS = {"analyte_01": "positive", "analyte_02": "negative"}
+# Estilo por grupo (corrigido: analyte_01 = negativo, analyte_02 = positivo)
+GROUP_LABELS = {"analyte_01": "negative", "analyte_02": "positive"}
 GROUP_COLORS = {"analyte_01": "#1f77b4", "analyte_02": "#d62728"}
 GROUP_LINES = {"analyte_01": "-", "analyte_02": "--"}
 
@@ -25,6 +25,7 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm, figures, save_dir=
 
     analytes = ["analyte_01", "analyte_02"]
     theta_deg = results["theta_deg"]
+
 
     for metal in ["Ag", "Au", "Cu"]:
         plt.figure(figsize=(10, 6))

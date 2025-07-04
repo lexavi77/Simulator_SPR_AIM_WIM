@@ -5,6 +5,7 @@ from calculate_figures import calculate_all_figures_of_merit
 from merit_figures_plot import plot_figures_of_merit
 from save_results import save_results_to_csv
 from plot_reflectance_full import plot_reflectance_22_curves
+from plot_sensitive_structure import plot_figures_of_merit_comparative
 from plot_style import apply_plot_style
 from plot_sensitive_structure import plot_angular_response_for_sensitive_structure_and_export_csv
 from optical_data import materials
@@ -16,7 +17,7 @@ from simulation_config import (
 def run_mode_1():
     """
     Mode 1: User selects a substrate; simulator compares Ag, Au, Cu
-    using analyte_01 (positive) and analyte_02 (negative) and calculates figures of merit.
+    using analyte_01 (negative) and analyte_02 (positive) and calculates figures of merit.
     """
     from simulation_config import analytes
 
@@ -35,10 +36,9 @@ def run_mode_1():
         print("[ERROR] Invalid option.")
         return
 
-    # Use both analytes for empirical sensitivity
     analyte = {
-        "analyte_01": analytes["analyte_01"],
-        "analyte_02": analytes["analyte_02"]
+        "analyte_01": analytes["analyte_01"],  # negative
+        "analyte_02": analytes["analyte_02"]   # positive
     }
 
     results = {
@@ -75,7 +75,6 @@ def run_mode_1():
     save_results_to_csv(results, metal_thicknesses_nm)
 
 
-
 def run_mode_2():
     print("\n[MODE 2] Plotting 22 reflectance curves per metal...")
 
@@ -104,7 +103,6 @@ def run_mode_2():
             d_cr, d_analyte, metal_thicknesses_nm
         )
 
-        # Merge reflectance and performance metrics
         results["reflectance"].update(res["reflectance"])
         results["theta_res"].update(res["theta_res"])
         results["fwhm"].update(res["fwhm"])
@@ -118,16 +116,44 @@ def run_mode_2():
                     results[key] = {}
                 results[key].update(res[key])
 
-    # Plot and save the 22 reflectance curves per metal
     plot_reflectance_22_curves(results, metal_thicknesses_nm, figures=results)
-
 
 
 def run_mode_3():
     print("\n[MODE 3] Plotting sensitive structures (TOPAS + d=55nm) for Ag, Au, Cu")
+
     substrate = "TOPAS"
+    analytes_22 = ["analyte_01", "analyte_02"]
     metals = ["Ag", "Au", "Cu"]
-    plot_angular_response_for_sensitive_structure_and_export_csv(
-        materials, lambda0, theta_deg, theta_rad,
-        d_cr, d_analyte, substrate, metals
-    )
+
+    results = {
+        "theta_deg": theta_deg,
+        "substrate": substrate,
+        "theta_res": {},
+        "fwhm": {},
+        "reflectance": {},
+    }
+
+    for metal in metals:
+        res = run_reflectance_simulation(
+            substrate, metal, analytes_22,
+            materials, lambda0, theta_deg, theta_rad,
+            d_cr, d_analyte, metal_thicknesses_nm
+        )
+
+        results["reflectance"].update(res["reflectance"])
+        results["theta_res"].update(res["theta_res"])
+        results["fwhm"].update(res["fwhm"])
+
+        calculate_all_figures_of_merit(res, materials, metal)
+
+        for key in [
+            "sensitivity_empirical", "chi_empirical", "q_empirical",
+            "sensitivity_theoretical", "chi_theoretical", "q_theoretical"
+        ]:
+            if key in res:
+                if key not in results:
+                    results[key] = {}
+                results[key].update(res[key])
+
+    plot_figures_of_merit_comparative(results, metal_thicknesses_nm, save_dir="outputs/sensitive_structure")

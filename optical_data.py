@@ -11,6 +11,6 @@ materials = {
     "Cu": 0.27630 + 5.4197j,
 
     # Analytes
-    "analyte_01": 1.3481,
-    "analyte_02": 1.3492
+    "analyte_01": 1.3492,
+    "analyte_02": 1.3481
 }

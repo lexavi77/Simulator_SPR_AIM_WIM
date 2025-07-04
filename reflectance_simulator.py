@@ -27,7 +27,6 @@ name_map = {
     "analyte_02": "negative"
 }
 
-# Auxiliar para aplicar janela angular
 def restrict_range(theta_deg, Rp, window=(40, 80)):
     mask = (theta_deg >= window[0]) & (theta_deg <= window[1])
     return theta_deg[mask], Rp[mask]
@@ -35,7 +34,7 @@ def restrict_range(theta_deg, Rp, window=(40, 80)):
 def run_reflectance_simulation(substrate, metal, analytes, materials,
                                 lambda0, theta_deg, theta_rad,
                                 d_cr, d_analyte, metal_thicknesses_nm,
-                                theta_window=(40, 80)):  # Janela padrão
+                                theta_window=(40, 80)):
     apply_plot_style()
     results = {
         "theta_res": {},
@@ -82,10 +81,12 @@ def run_reflectance_simulation(substrate, metal, analytes, materials,
 
             color = color_palette[i % len(color_palette)]
             plt.plot(theta_deg, Rp, linewidth=1.5, color=color,
-                     label=f'{d_metal_nm} nm | θres ≈ {theta_res:.2f}°')
+                     label=f'{d_metal_nm} nm | θres ≈ {theta_res:.2f}°',
+                     zorder=1.5)
+
             if not np.isnan(theta_res):
                 Rp_res = np.interp(theta_res, theta_deg, Rp)
-                plt.plot(theta_res, Rp_res, 'ko', markersize=5, markerfacecolor='black')
+                plt.plot(theta_res, Rp_res, 'ko', markersize=5, markerfacecolor='black', zorder=3)
 
         results["theta_res"][(metal, analyte)] = theta_res_list
         results["fwhm"][(metal, analyte)] = fwhm_list

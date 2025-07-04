@@ -1,6 +1,6 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 from scipy.interpolate import CubicSpline
 from matplotlib.font_manager import FontProperties
 from plot_utils import save_figure
@@ -34,17 +34,15 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figur
     ]
 
     titles = {
-     "theta_res": (r"Resonance Angle (°)", "Metal Thickness (nm)"),
-     "fwhm": (r"FWHM (°)", "Metal Thickness (nm)"),
-     "sensitivity_empirical": (r"Sensitivity (°/RIU)", "Metal Thickness (nm)"),
-     "sensitivity_theoretical": (r"Sensitivity (°/RIU)", "Metal Thickness (nm)"),
-     "chi_empirical": (r"$\chi$ (RIU$^{-1})$", "Metal Thickness (nm)"),
-     "chi_theoretical": (r"$\chi$ (RIU$^{-1})$", "Metal Thickness (nm)"),
-     "q_empirical": (r"$Q$ (a.u.)", "Metal Thickness (nm)"),
-     "q_theoretical": (r"$Q$ (a.u.)", "Metal Thickness (nm)")
+        "theta_res": (r"Resonance Angle (°)", "Metal Thickness (nm)"),
+        "fwhm": (r"FWHM (°)", "Metal Thickness (nm)"),
+        "sensitivity_empirical": (r"Sensitivity (°/RIU)", "Metal Thickness (nm)"),
+        "sensitivity_theoretical": (r"Sensitivity (°/RIU)", "Metal Thickness (nm)"),
+        "chi_empirical": (r"$\chi$ (RIU$^{-1})$", "Metal Thickness (nm)"),
+        "chi_theoretical": (r"$\chi$ (RIU$^{-1})$", "Metal Thickness (nm)"),
+        "q_empirical": (r"$Q$ (a.u.)", "Metal Thickness (nm)"),
+        "q_theoretical": (r"$Q$ (a.u.)", "Metal Thickness (nm)")
     }
-
-
 
     for metric in metrics:
         metric_data = results.get(metric, {})
@@ -69,19 +67,20 @@ def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figur
 
             has_valid_data = True
             label = f"{metal}"
+            color = color_palette[idx % len(color_palette)]
 
-            # Ponto original
-            plt.plot(x, y, 'ko', markersize=5, markerfacecolor='black')
+            # Pontos pretos sobrepostos
+            plt.plot(x, y, 'ko', markersize=5, markerfacecolor='black', zorder=3)
 
-            # Interpolação suave
+            # Curva suavizada com interpolação
             if len(x) >= 4 and not np.any(np.isnan(y)):
                 spline = CubicSpline(x, y)
                 x_fine = np.linspace(min(x), max(x), 500)
                 y_smooth = spline(x_fine)
-                color = color_palette[idx % len(color_palette)]
-                plt.plot(x_fine, y_smooth, linewidth=1.5, color=color, label=label)
+                plt.plot(x_fine, y_smooth, linewidth=1.5, color=color, label=label, zorder=1.5)
             else:
-                plt.plot(x, y, 'k--', linewidth=1.0, label=label)
+                # Curva fallback (sem interpolação)
+                plt.plot(x, y, 'k--', linewidth=1.0, label=label, zorder=1.5)
 
         if has_valid_data:
             ylabel, xlabel = titles[metric]

@@ -21,7 +21,6 @@ def calculate_all_figures_of_merit(results, materials, metal):
 
         # --- Theoretical sensitivity, chi, Q
         n_analyte = materials[analyte].real
-        eps_metal = materials[metal] ** 2
 
         sensitivity_theoretical = [
             calculate_theoretical_sensitivity_precise(
@@ -38,14 +37,15 @@ def calculate_all_figures_of_merit(results, materials, metal):
         results.setdefault("chi_theoretical", {})[(metal, analyte)] = chi_theoretical
         results.setdefault("q_theoretical", {})[(metal, analyte)] = q_theoretical
 
-    # --- Sensibilidade empírica (Δθ / Δn) entre analyte_01 e analyte_02
-    theta_pos = results["theta_res"][(metal, "analyte_01")]  # positivo = maior índice
-    theta_neg = results["theta_res"][(metal, "analyte_02")]  # negativo = menor índice
-    fwhm_pos = results["fwhm"][(metal, "analyte_01")]
-    fwhm_neg = results["fwhm"][(metal, "analyte_02")]
+    # --- Sensibilidade empírica (Δθ / Δn) entre analyte_01 (negativo) e analyte_02 (positivo)
+    theta_neg = results["theta_res"][(metal, "analyte_01")]
+    theta_pos = results["theta_res"][(metal, "analyte_02")]
 
-    n_pos = materials["analyte_01"].real
-    n_neg = materials["analyte_02"].real
+    fwhm_neg = results["fwhm"][(metal, "analyte_01")]
+    fwhm_pos = results["fwhm"][(metal, "analyte_02")]
+
+    n_neg = materials["analyte_01"].real
+    n_pos = materials["analyte_02"].real
 
     sensitivity_empirical = [
         calculate_sensitivity_empirical(tp, tn, n_pos, n_neg)
@@ -58,5 +58,5 @@ def calculate_all_figures_of_merit(results, materials, metal):
     chi_empirical_pos = [calculate_chi(s, f) for s, f in zip(sensitivity_empirical, fwhm_pos)]
     chi_empirical_neg = [calculate_chi(s, f) for s, f in zip(sensitivity_empirical, fwhm_neg)]
 
-    results.setdefault("chi_empirical", {})[(metal, "analyte_01")] = chi_empirical_pos
-    results.setdefault("chi_empirical", {})[(metal, "analyte_02")] = chi_empirical_neg
+    results.setdefault("chi_empirical", {})[(metal, "analyte_02")] = chi_empirical_pos
+    results.setdefault("chi_empirical", {})[(metal, "analyte_01")] = chi_empirical_neg

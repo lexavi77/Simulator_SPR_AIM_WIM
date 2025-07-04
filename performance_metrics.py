@@ -74,18 +74,20 @@ def calculate_theoretical_sensitivity_precise(n_metal, n_analyte, n_substrate):
     return np.degrees(sensitivity_rad)
 
 def compute_figures_of_merit(reflectance_data, config):
-    # Analytes fixos conforme o modelo atual
-    analyte_neg = config["analytes"]["analyte_01"]  # 1.3492
-    analyte_pos = config["analytes"]["analyte_02"]  # 1.3481
+    # Analytes fixos conforme a nova convenção:
+    # analyte_01 = 1.3492 → negativo
+    # analyte_02 = 1.3481 → positivo
+    analyte_neg = config["analytes"]["analyte_01"]  # negativo
+    analyte_pos = config["analytes"]["analyte_02"]  # positivo
     metal_thicknesses = config["metal_thicknesses_nm"]
 
     substrate_n = config["layers"]["substrate_n"]
     metal_n = config["layers"]["metal_n"]
 
-    # Reflectância e FWHM para ambos os analytes
+    # Reflectância e FWHM corretamente associados
     theta_res_neg = reflectance_data["analyte_01"]["theta_res"]
     theta_res_pos = reflectance_data["analyte_02"]["theta_res"]
-    fwhm_list = reflectance_data["analyte_01"]["fwhm"]
+    fwhm_list = reflectance_data["analyte_02"]["fwhm"]
 
     # Sensibilidade empírica ponto a ponto
     s_empirical = [

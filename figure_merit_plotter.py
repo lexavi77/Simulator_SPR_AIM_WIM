@@ -21,9 +21,10 @@ color_palette = [
 ]
 
 name_map = {
-    "analyte_01": "positive",
-    "analyte_02": "negative"
+    "analyte_01": "negative",
+    "analyte_02": "positive"
 }
+
 
 def plot_figures_of_merit(results, metal_thicknesses_nm, save_dir="outputs/figures_of_merit"):
     apply_plot_style()

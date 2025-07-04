@@ -1,4 +1,6 @@
 from modes_aim import run_mode_1, run_mode_2, run_mode_3
+from plot_sensitive_structure import plot_figures_of_merit_comparative
+
 
 def main():
     print("Select simulation mode:")
