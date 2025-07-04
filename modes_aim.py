@@ -63,7 +63,6 @@ def run_mode_1():
         calculate_all_figures_of_merit(res, materials, metal)
 
         for key in [
-            "sensitivity_empirical", "chi_empirical", "q_empirical",
             "sensitivity_theoretical", "chi_theoretical", "q_theoretical"
         ]:
             if key in res:
@@ -72,7 +71,9 @@ def run_mode_1():
                 results[key].update(res[key])
 
     plot_figures_of_merit(results, metal_thicknesses_nm)
-    save_results_to_csv(results, metal_thicknesses_nm)
+    
+    # ⚠️ Corrigido: passa o dicionário de analytes corretamente
+    save_results_to_csv(results, metal_thicknesses_nm, analyte)
 
 
 def run_mode_2():
