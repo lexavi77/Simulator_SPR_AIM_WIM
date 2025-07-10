@@ -2,7 +2,7 @@ materials = {
     # Dielectric substrates
     "PMMA": 1.4835 + 0j,
     "PC": 1.5688 + 0j,
-    "TOPAS": 1.5548 + 0j,
+    "TOPAS": 1.52564+ 0j,
 
     # Metals
     "Cr": 3.2408 + 3.4963j,
