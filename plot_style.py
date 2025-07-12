@@ -1,34 +1,27 @@
-# plot_style.py
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import os
-from matplotlib import font_manager
 
 def apply_plot_style():
-    # Caminho da Times New Roman
-    font_path = "/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf"
-    fallback_font = "DejaVu Serif"
-
-    if os.path.exists(font_path):
-        font_entry = font_manager.FontProperties(fname=font_path)
-        tnr_name = font_entry.get_name()
-        mpl.rcParams["font.family"] = [tnr_name, fallback_font]
-        print(f"[INFO] Using font: {tnr_name} with fallback: {fallback_font}")
-    else:
-        mpl.rcParams["font.family"] = [fallback_font]
-        print(f"[WARNING] Times New Roman not found. Using fallback: {fallback_font}")
-
-    mpl.rcParams.update({
-        "font.size": 12,
-        "axes.labelsize": 14,
-        "axes.titlesize": 14,
-        "xtick.labelsize": 12,
-        "ytick.labelsize": 12,
-        "legend.fontsize": 12,
-        "lines.linewidth": 2,
-        "lines.markersize": 6,
+    """
+    Applies a consistent MATLAB-like style to all plots.
+    This includes grid lines, classic line widths, and LaTeX-style fonts.
+    """
+    plt.rcParams.update({
+        "axes.spines.top": False,
+        "axes.spines.right": False,
         "axes.grid": True,
         "grid.alpha": 0.3,
-        "savefig.facecolor": "white",
-        "savefig.edgecolor": "white"
+        "grid.linestyle": "--",
+        "grid.color": "gray",
+        "legend.frameon": False,
+        "lines.linewidth": 1.8,
+        "lines.markersize": 6,
+        "font.family": "serif",
+        "font.serif": ["Times New Roman", "Times", "DejaVu Serif", "Palatino"],
+        "mathtext.fontset": "cm",
+        "xtick.direction": "in",
+        "ytick.direction": "in",
+        "xtick.major.size": 5,
+        "ytick.major.size": 5,
+        "figure.dpi": 100,
+        "savefig.dpi": 300
     })

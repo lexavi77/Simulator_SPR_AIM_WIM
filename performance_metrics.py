@@ -1,63 +1,84 @@
 import numpy as np
 from scipy.interpolate import CubicSpline
 from scipy.optimize import minimize_scalar
+from numpy import pi
+import warnings
 
 def calculate_theta_res(Rp, theta_deg):
-    idx_min = np.argmin(Rp)
-    return theta_deg[idx_min]
+    """Returns the angle at which reflectance is minimum."""
+    return theta_deg[np.argmin(Rp)]
 
-def calculate_theta_res_smooth(theta_deg, Rp):
-    sorted_indices = np.argsort(theta_deg)
-    theta_sorted = theta_deg[sorted_indices]
-    Rp_sorted = Rp[sorted_indices]
+def calculate_theta_res_smooth(theta_deg, Rp, threshold_ratio=0.98, min_angle=50, max_angle=80):
+    """
+    Robust estimation of the resonance angle using cubic spline interpolation.
 
-    _, unique_indices = np.unique(theta_sorted, return_index=True)
-    theta_sorted = theta_sorted[unique_indices]
-    Rp_sorted = Rp_sorted[unique_indices]
+    Parameters:
+        theta_deg (np.ndarray): Array of incidence angles in degrees.
+        Rp (np.ndarray): Reflectance array.
+        threshold_ratio (float): Ratio to define resonance dip window.
+        min_angle, max_angle (float): Angle bounds for the fitting.
 
+    Returns:
+        theta_res (float): Estimated resonance angle.
+    """
     try:
-        spline = CubicSpline(theta_sorted, Rp_sorted)
-        threshold = np.max(Rp_sorted) * 0.9
-        candidates = np.where(Rp_sorted < threshold)[0]
+        mask = (theta_deg >= min_angle) & (theta_deg <= max_angle)
+        theta_filtered = theta_deg[mask]
+        Rp_filtered = Rp[mask]
 
-        if len(candidates) >= 2:
-            start = theta_sorted[candidates[0]]
-            end = theta_sorted[candidates[-1]]
-        else:
-            start = theta_sorted[0]
-            end = theta_sorted[-1]
+        if len(theta_filtered) < 5:
+            warnings.warn("Insufficient data in selected range. Falling back to simple minimum.")
+            return calculate_theta_res(Rp, theta_deg)
 
+        spline = CubicSpline(theta_filtered, Rp_filtered)
+        threshold = np.max(Rp_filtered) * threshold_ratio
+        candidates = np.where(Rp_filtered < threshold)[0]
+
+        if len(candidates) < 2:
+            warnings.warn("No valid resonance dip found. Using fallback.")
+            return calculate_theta_res(Rp, theta_deg)
+
+        start = theta_filtered[candidates[0]]
+        end = theta_filtered[candidates[-1]]
         result = minimize_scalar(spline, bounds=(start, end), method='bounded')
-        if result.success:
-            return result.x
-    except Exception as e:
-        print("⚠️ Error in calculate_theta_res_smooth:", e)
 
-    return calculate_theta_res(Rp_sorted, theta_sorted)
+        return result.x if result.success else calculate_theta_res(Rp, theta_deg)
+
+    except Exception as e:
+        warnings.warn(f"Exception in resonance estimation: {e}")
+        return calculate_theta_res(Rp, theta_deg)
 
 def calculate_fwhm(Rp, theta_deg):
+    """Calculates the Full Width at Half Maximum (FWHM) of the reflectance dip."""
     Rp_min = np.min(Rp)
     Rp_max = np.max(Rp)
     half_max = (Rp_max + Rp_min) / 2
-    crossing_indices = np.where(np.diff(np.sign(Rp - half_max)))[0]
+    crossings = np.where(np.diff(np.sign(Rp - half_max)))[0]
 
-    if len(crossing_indices) >= 2:
-        theta1 = theta_deg[crossing_indices[0]]
-        theta2 = theta_deg[crossing_indices[-1]]
-        return abs(theta2 - theta1)
+    if len(crossings) >= 2:
+        return abs(theta_deg[crossings[-1]] - theta_deg[crossings[0]])
     return np.nan
 
 def calculate_q(theta_res, fwhm):
+    """Calculates the quality factor Q = θres / FWHM."""
     return theta_res / fwhm if fwhm and not np.isnan(fwhm) else np.nan
 
 def calculate_chi(sensitivity, fwhm):
+    """Calculates χ = Sensitivity / FWHM."""
     return sensitivity / fwhm if fwhm and not np.isnan(fwhm) else np.nan
 
 def calculate_sensitivity_empirical(theta_res_pos, theta_res_neg, n_pos, n_neg):
+    """Estimates sensitivity using empirical θres shift over Δn."""
     delta_n = n_pos - n_neg
     return (theta_res_pos - theta_res_neg) / delta_n if delta_n != 0 else np.nan
 
 def calculate_theoretical_sensitivity_precise(n_metal, n_analyte, n_substrate):
+    """
+    Calculates theoretical angular sensitivity from SPR dispersion relation.
+
+    Reference:
+        Based on model from [Thirstrup, 2004] and adapted for angular SPR systems.
+    """
     eps = n_metal ** 2
     eps_mr = np.real(eps)
     n_eff = np.real(n_analyte)
@@ -72,54 +93,3 @@ def calculate_theoretical_sensitivity_precise(n_metal, n_analyte, n_substrate):
 
     sensitivity_rad = numerator / (denominator * np.sqrt(root_term))
     return np.degrees(sensitivity_rad)
-
-def compute_figures_of_merit(reflectance_data, config):
-    # Analytes fixos conforme a nova convenção:
-    # analyte_01 = 1.3492 → negativo
-    # analyte_02 = 1.3481 → positivo
-    analyte_neg = config["analytes"]["analyte_01"]  # negativo
-    analyte_pos = config["analytes"]["analyte_02"]  # positivo
-    metal_thicknesses = config["metal_thicknesses_nm"]
-
-    substrate_n = config["layers"]["substrate_n"]
-    metal_n = config["layers"]["metal_n"]
-
-    # Reflectância e FWHM corretamente associados
-    theta_res_neg = reflectance_data["analyte_01"]["theta_res"]
-    theta_res_pos = reflectance_data["analyte_02"]["theta_res"]
-    fwhm_list = reflectance_data["analyte_02"]["fwhm"]
-
-    # Sensibilidade empírica ponto a ponto
-    s_empirical = [
-        calculate_sensitivity_empirical(pos, neg, analyte_pos, analyte_neg)
-        for pos, neg in zip(theta_res_pos, theta_res_neg)
-    ]
-
-    # Sensibilidade teórica baseada no analyte positivo
-    s_theoretical = calculate_theoretical_sensitivity_precise(
-        n_metal=metal_n,
-        n_analyte=analyte_pos,
-        n_substrate=substrate_n
-    )
-
-    # Outras métricas
-    q_list = [calculate_q(theta, fwhm) for theta, fwhm in zip(theta_res_pos, fwhm_list)]
-    chi_empirical = [calculate_chi(s, f) for s, f in zip(s_empirical, fwhm_list)]
-    chi_theoretical = [calculate_chi(s_theoretical, f) for f in fwhm_list]
-
-    figures = {
-        "theta_res": {"analyte_02": theta_res_pos},  # positivo
-        "fwhm": {"analyte_02": fwhm_list},
-        "q": {"analyte_02": q_list},
-
-        "sensitivity_empirical": s_empirical,
-        "sensitivity_theoretical": [s_theoretical] * len(metal_thicknesses),
-
-        "chi_empirical": chi_empirical,
-        "chi_theoretical": chi_theoretical,
-
-        "q_empirical": q_list,
-        "q_theoretical": q_list
-    }
-
-    return figures
