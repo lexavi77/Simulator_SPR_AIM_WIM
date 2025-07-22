@@ -3,19 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.constants import pi
 
 def getReflectivity(n, d, theta, wavelength):
-    """
-    Calcula a reflectância e o coeficiente de reflexão usando o método das matrizes de Abeles.
-    
-    Parâmetros:
-    - n: índices de refração das camadas (array complexo)
-    - d: espessuras das camadas (em metros)
-    - theta: ângulo de incidência (em radianos)
-    - wavelength: comprimento de onda (em metros)
-
-    Retorna:
-    - Reflectância (módulo ao quadrado de r)
-    - Coeficiente de reflexão r (complexo)
-    """
+ 
     mu = np.ones(len(n))
     k0 = 2 * pi / wavelength
     kz = k0 * np.sqrt(n**2 - (n[0] * np.sin(theta))**2)
