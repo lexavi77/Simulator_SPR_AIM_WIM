@@ -13,6 +13,7 @@ try:
 except Exception:
     TNR = None
     print("[WARNING] Times New Roman not found. Using default font.")
+    
 # analyte_01 = negative, analyte_02 = positive)
 GROUP_LABELS = {"analyte_01": "negative", "analyte_02": "positive"}
 GROUP_COLORS = {"analyte_01": "#1f77b4", "analyte_02": "#d62728"}
