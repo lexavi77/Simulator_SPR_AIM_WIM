@@ -2,20 +2,7 @@ import numpy as np
 from scipy.constants import pi
 
 def getFresnelWIM_TM(n, d, theta, wavelength):
-    """
-    Calcula a refletância TM usando a matriz característica (modo WIM).
-
-    Parâmetros:
-    - n: array com índices de refração (complexos)
-    - d: array com espessuras das camadas (em metros)
-    - theta: ângulo de incidência (em rad)
-    - wavelength: comprimento de onda (em metros)
-
-    Retorna:
-    - r: coeficiente de reflexão complexo
-    - t: coeficiente de transmissão complexo
-    - Rp: refletância (|r|^2)
-    """
+    
     mu = np.ones(len(n))  # permeabilidade relativa (μ ≈ 1)
     epsilon = np.sqrt(n**2 - (np.real(n[0]) * np.sin(theta))**2)
     beta = (2 * pi / wavelength) * d * epsilon
