@@ -63,7 +63,7 @@ def plot_reflectance_22_curves(results, metal_thicknesses_nm, figures, save_dir=
 
         plt.ylim(0, 1)
 
-        # Inserir sensibilidades exatas no gráfico (calculadas com base em analyte_01)
+        # sensibility for anality 01 
         try:
             s_num = figures["sensitivity_empirical"][0]
             s_theo = figures["sensitivity_theoretical"][0]
