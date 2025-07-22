@@ -26,19 +26,7 @@ def getReflectivity(n, d, theta, wavelength):
     return np.abs(r)**2, r
 
 def field_distribution(theta_res, n, d, wavelength, z_range):
-    """
-    Calcula o perfil do campo magnético Hy² ao longo da profundidade, normalizado.
     
-    Parâmetros:
-    - theta_res: ângulo de ressonância (em radianos)
-    - n: índices de refração
-    - d: espessuras
-    - wavelength: comprimento de onda (m)
-    - z_range: vetor de profundidade (m)
-
-    Retorna:
-    - Perfil normalizado da intensidade do campo magnético ao longo de z_range
-    """
     k0 = 2 * np.pi / wavelength
     kx = k0 * n[0] * np.sin(theta_res)
 
