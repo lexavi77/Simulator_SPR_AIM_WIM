@@ -15,7 +15,7 @@ except Exception:
     TNR = None
     print("[WARNING] Times New Roman not found. Using default font.")
 
-# Paleta MATLAB-like
+# Paleta scientific article
 color_palette = [
     (0, 0.5, 0), (0, 0, 1), (0.93, 0.11, 0.14), (0, 0.75, 0.75),
     (0.75, 0, 0.75), (0.75, 0.75, 0), (0.25, 0.25, 0.25), (1, 0.5, 0),
