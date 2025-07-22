@@ -72,7 +72,7 @@ def run_mode_1():
 
     plot_figures_of_merit(results, metal_thicknesses_nm)
     
-    # ⚠️ Corrigido: passa o dicionário de analytes corretamente
+    
     save_results_to_csv(results, metal_thicknesses_nm, analyte)
 
 
