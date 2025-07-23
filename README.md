@@ -1,11 +1,13 @@
 # Simulator_SPR_AIM_WIM
 
-A Python simulator for **Surface Plasmon Resonance (SPR)** sensors, focused on the **Angular Interrogation Method (AIM)**, with support for modeling multilayer structures often used in biosensing — particularly for **LAMP‑SPR** (Loop‑Mediated Isothermal Amplification) integration.
+A Python-based simulator for **Surface Plasmon Resonance (SPR)** sensors, focused on the **Angular Interrogation Method (AIM)**. It models multilayer structures commonly used in biosensing — particularly for hybrid **LAMP‑SPR** (Loop‑Mediated Isothermal Amplification) applications.
 
-This tool enables precise reflectance modeling, export of performance metrics, and publication‑ready plots.  
-> 🔬 **Wavelength Interrogation Mode (WIM)** is currently under development.
+The main goal is to **compute figures of merit** — including resonance angle, FWHM, sensitivity, Q‑factor, and χ — to determine which **metal (Ag, Au, or Cu)** and **film thickness** provide the best sensing performance.  
+The simulator performs a sweep over **metal thicknesses from 45 to 55 nm, in 1 nm steps**, enabling a fine-grained evaluation of structural variations.
 
----
+This tool provides accurate reflectance simulations, exportable performance metrics, and publication-quality plots.  
+> 🔬 **Wavelength Interrogation Mode (WIM)** is under active development.
+
 
 ## 📌 Overview
 
